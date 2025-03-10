@@ -1,0 +1,56 @@
+.navbar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
+  backdrop-filter: blur(15px); /* Glassmorphism effect */
+  border-radius: 50px; /* Rounded corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.logo {
+  height: 40px;
+  width: 40px;
+  font-weight: bold;
+}
+
+.navbar .nav-links {
+  display: flex;
+  list-style: none;
+  gap: 25px;
+}
+
+.navbar .nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  transition: 0.3s;
+}
+
+.navbar .nav-links li a:hover {
+  color: #f39c12;
+}
+
+/* Gradient Button */
+.navbar .cta-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(45deg, #ff6ec4, #7873f5);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.navbar .cta-button:hover {
+  transform: scale(1.05);
+}
