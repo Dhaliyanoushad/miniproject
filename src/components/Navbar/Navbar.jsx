@@ -9,7 +9,7 @@ const Navbar = () => {
     logoRef.current.classList.add("animate");
     setTimeout(() => {
       logoRef.current.classList.remove("animate");
-    }, 1000); // Duration of the animation
+    }, 2000); // Duration of the animation
   };
 
   const handleScroll = (id) => {
