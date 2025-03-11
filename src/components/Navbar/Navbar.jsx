@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useRef } from "react";
 import "./Navbar.css";
 import logo from "/icon.svg";
 
 const Navbar = () => {
+  const logoRef = useRef(null);
+
+  const handleLogoClick = () => {
+    logoRef.current.classList.add("animate");
+    setTimeout(() => {
+      logoRef.current.classList.remove("animate");
+    }, 1000); // Duration of the animation
+  };
+
   const handleScroll = (id) => {
     document.getElementById(id).scrollIntoView({
       behavior: "smooth",
@@ -12,7 +21,13 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <img src={logo} alt="Logo" className="logo" />
+      <img
+        src={logo}
+        alt="Logo"
+        className="logo"
+        ref={logoRef}
+        onClick={handleLogoClick}
+      />
       <ul className="nav-links">
         <li>
           <a onClick={() => handleScroll("home")}>Home</a>

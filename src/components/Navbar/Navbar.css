@@ -71,6 +71,21 @@
   padding: 15px 40px; /* Match the top padding reduction */
 }
 
+/* Keyframes for music animation */
+@keyframes musicAnimation {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(360deg) scale(1.2);
+  }
+}
+
+/* Apply animation to logo when clicked */
+.logo.animate {
+  animation: musicAnimation 1s ease-in-out;
+}
+
 /* Add responsive adjustments */
 /* @media (max-width: 768px) {
   .navbar {
