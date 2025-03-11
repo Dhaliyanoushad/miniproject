@@ -1,56 +1,92 @@
 .navbar {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 1200px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100vw;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
-  background: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
-  backdrop-filter: blur(15px); /* Glassmorphism effect */
-  border-radius: 50px; /* Rounded corners */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  color: white;
+  padding: 20px 40px; /* Reduced side padding */
+  background: transparent;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-sizing: border-box; /* Ensure padding is included in width calculations */
 }
 
+/* ✅ Full width logo */
 .logo {
   height: 40px;
   width: 40px;
-  font-weight: bold;
+  flex-shrink: 0; /* Prevent logo from shrinking */
 }
 
+/* ✅ Centering links */
 .navbar .nav-links {
   display: flex;
   list-style: none;
-  gap: 25px;
+  gap: 35px;
+  margin: 0 auto; /* Center the navigation links */
+  padding: 0; /* Remove default padding */
 }
 
+/* ✅ Smooth link effect */
 .navbar .nav-links li a {
   color: white;
   text-decoration: none;
   font-size: 18px;
-  transition: 0.3s;
+  transition: all 0.3s;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .navbar .nav-links li a:hover {
   color: #f39c12;
+  transform: scale(1.05);
 }
 
-/* Gradient Button */
+/* ✅ Full Width Button */
 .navbar .cta-button {
-  padding: 10px 20px;
+  padding: 12px 24px; /* Slightly reduced padding */
   border: none;
   border-radius: 30px;
   background: linear-gradient(45deg, #ff6ec4, #7873f5);
   color: white;
   font-size: 16px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s;
+  flex-shrink: 0; /* Prevent button from shrinking */
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .navbar .cta-button:hover {
   transform: scale(1.05);
+  background: linear-gradient(45deg, #f39c12, #f559c4);
 }
+
+/* ✅ Sticky navbar effect (like Apple) */
+.navbar.scrolled {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 15px 40px; /* Match the top padding reduction */
+}
+
+/* Add responsive adjustments */
+/* @media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+  }
+
+  .navbar .nav-links {
+    gap: 20px;
+  }
+
+  .navbar .nav-links li a {
+    font-size: 16px;
+  }
+
+  .navbar .cta-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+} */

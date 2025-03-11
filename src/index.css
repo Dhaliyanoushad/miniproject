@@ -1,19 +1,27 @@
-/* Full-screen background with purple and pink gradient */
+/* Full-screen background with hands.jpeg image and smooth gradient overlay */
 body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  width: 100vw;
-  background: radial-gradient(circle at top, #7a3b69, #401f71, #0d0221);
+  max-width: 100vw;
+  /* background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url("./assets/dj.jpg"); 
   background-size: cover;
-  background-attachment: fixed;
-  color: white; /* Ensures readability */
+  background-position: center;
+  background-attachment: fixed; */
+  color: white;
   font-family: "Poppins", sans-serif;
 }
 
-/* Optional: Apply same background to root */
+/* Apply full background to root */
 #root {
-  height: 100vh;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
+}
+
+/* Enhance text readability */
+* {
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
 }
