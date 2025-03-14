@@ -1,0 +1,194 @@
+.feature-cards-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px;
+  background-color: #0a0a0a;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  min-height: 100vh;
+  align-items: center;
+}
+
+.feature-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.feature-card {
+  background-color: rgba(10, 10, 15, 0.8);
+  border-radius: 20px;
+  width: 200px;
+  height: 500px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  flex-basis: calc(33.33% - 20px); /* Limits 3 items per row */
+  max-width: calc(33.33% - 20px);
+}
+
+.feature-icon-container {
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.feature-icon {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 10px rgba(198, 95, 224, 0.7));
+}
+
+.feature-title {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  margin-top: auto;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+.feature-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: auto;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+.card-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 20px;
+  padding-bottom: 10px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  background-color: white;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.dot:first-child {
+  opacity: 1;
+}
+
+/* Update SVG gradients to match purple theme */
+#handGradient1 stop:first-child,
+#fingerprintGradient stop:first-child,
+#diskGradient stop:first-child {
+  stop-color: #c65fe0;
+}
+
+#handGradient1 stop:last-child,
+#fingerprintGradient stop:last-child,
+#diskGradient stop:last-child {
+  stop-color: #9d4eca;
+}
+
+/* Adding navbar styling to match the image */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.logo {
+  background-color: #c65fe0;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+}
+
+.get-started-btn {
+  background-color: #c65fe0;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 25px;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Button styling to match image */
+.cta-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn {
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #c65fe0;
+  color: white;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .feature-cards-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .feature-card {
+    width: 100%;
+    max-width: 320px;
+    height: 450px;
+  }
+
+  .navbar {
+    padding: 15px;
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    gap: 15px;
+  }
+}
