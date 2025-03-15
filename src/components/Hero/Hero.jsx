@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import "./Hero.css";
-import eventImage from "../../assets/dj.jpg";
+import dj from "../../assets/dj.jpg";
+import eventImage from "../../assets/pdisco.jpg";
 
 const HeroSection = () => {
   const heroRef = useRef(null);
@@ -31,10 +32,29 @@ const HeroSection = () => {
           <button className="get-app-btn">Get App</button>
         </div>
       </div>
-      <div
-        className="hero-image"
-        style={{ backgroundImage: `url(${eventImage})` }}
-      >
+      <div className="hero-images-container">
+        <div className="left-column">
+          <img
+            src={eventImage}
+            alt="Elegant event with people on stairs"
+            className="event-images formal-event"
+          />
+          <img
+            src={eventImage}
+            alt="Holiday decorations with gold ornaments"
+            className="event-images holiday-decor"
+          />
+        </div>
+        <div className="right-column">
+          <img
+            src={eventImage}
+            alt="People enjoying dinner event"
+            className="event-images dinner-event"
+          />
+        </div>
+      </div>
+
+      <div className="hero-image" style={{ backgroundImage: `url(${dj})` }}>
         <div className="image-overlay"></div>
       </div>
     </div>
