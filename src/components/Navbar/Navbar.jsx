@@ -1,9 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Navbar.css";
 import logo from "/icon.svg";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const handleScroll = (id) => {
+  const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // ✅ Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleScrollToSection = (id) => {
     document.getElementById(id).scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -11,23 +30,39 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
       <img src={logo} alt="Logo" className="logo" />
+
       <ul className="nav-links">
         <li>
-          <a onClick={() => handleScroll("home")}>Home</a>
+          <a onClick={() => handleScrollToSection("home")}>Home</a>
         </li>
         <li>
-          <a onClick={() => handleScroll("services")}>Services</a>
+          <a onClick={() => handleScrollToSection("services")}>Events</a>
         </li>
         <li>
-          <a onClick={() => handleScroll("portfolio")}>Portfolio</a>
+          <a onClick={() => handleScrollToSection("portfolio")}>About</a>
         </li>
         <li>
-          <a onClick={() => handleScroll("contact")}>Contact</a>
+          <a onClick={() => handleScrollToSection("contact")}>Contact</a>
+        </li>
+        <li>
+          <a onClick={() => handleScrollToSection("contact")}>Dools</a>
         </li>
       </ul>
-      <button className="cta-button">Get Started</button>
+
+      {/* ✅ Transparent Search Bar */}
+      <input
+        type="text"
+        className="search-bar"
+        placeholder="Search..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+
+      <button className="cta-button" onClick={() => navigate("/signin")}>
+        Register
+      </button>
     </nav>
   );
 };
