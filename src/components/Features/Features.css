@@ -1,0 +1,180 @@
+/* Main container styles */
+.card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  color: white;
+  background: linear-gradient(to right, #0a0618, #130a2b, #0a0618);
+  position: relative;
+  overflow: hidden;
+  padding: 40px 20px;
+  scroll-margin-top: 80px; /* Adjust according to navbar height */
+}
+
+.card-blue-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20%;
+  height: 100%;
+  background: linear-gradient(to left, rgba(102, 51, 153, 0.3), transparent);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Header section styles */
+.card-header-section {
+  text-align: center;
+  margin-bottom: 60px;
+  max-width: 900px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.card-why-choose-button {
+  padding: 8px 20px;
+  margin-bottom: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: rgba(28, 16, 58, 0.7);
+  border: 1px solid rgba(102, 51, 153, 0.3);
+  border-radius: 30px;
+  color: #e2e2f5;
+  cursor: pointer;
+}
+
+.card-main-heading {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  line-height: 1.2;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(102, 51, 153, 0.5);
+}
+
+.card-italic {
+  font-style: italic;
+}
+
+.card-subheading {
+  max-width: 700px;
+  margin: 0 auto;
+  color: rgba(229, 231, 235, 0.8);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* Features container styles */
+.card-features-container {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 60px;
+  max-width: 1200px;
+  width: 100%;
+  position: relative;
+}
+
+@media (max-width: 991px) {
+  .card-features-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Floating Animation */
+@keyframes floatEffect {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.card-feature-card {
+  background-color: rgba(18, 10, 34, 0.8);
+  border-radius: 12px;
+  padding: 30px;
+  border: 1px solid rgba(102, 51, 153, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 450px;
+  animation: floatEffect 4s ease-in-out infinite;
+  backdrop-filter: blur(5px);
+}
+
+.card-feature-card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 10px 30px rgba(102, 51, 153, 0.25);
+  border: 1px solid rgba(102, 51, 153, 0.4);
+}
+
+/* Icon container */
+.card-icon-container {
+  background-color: rgba(28, 16, 58, 0.7);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(102, 51, 153, 0.15);
+}
+
+.card-feature-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ffffff;
+}
+
+.card-feature-description {
+  color: rgba(229, 231, 235, 0.7);
+  line-height: 1.6;
+}
+
+/* CTA section styles */
+.card-cta-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 60px;
+}
+
+@media (max-width: 767px) {
+  .card-cta-section {
+    flex-direction: column;
+  }
+}
+
+.card-cta-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  background: linear-gradient(45deg, #4b0082, #663399);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(102, 51, 153, 0.3);
+}
+
+.card-cta-button:hover {
+  background: linear-gradient(45deg, #3a0066, #552288);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 51, 153, 0.4);
+}
