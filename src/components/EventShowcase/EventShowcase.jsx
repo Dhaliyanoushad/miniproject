@@ -90,7 +90,7 @@ const EventShowcase = () => {
           <button
             className={`px-6 py-2 rounded-full transition-all ${
               activeCategory === "all"
-                ? "bg-[#6A5F7E] text-white"
+                ? "bg-[#6A5F7E] text-white active"
                 : "bg-[#1C1C2E] text-gray-400 hover:bg-[#6A5F7E] hover:text-white"
             }`}
             onClick={() => setActiveCategory("all")}
@@ -100,7 +100,7 @@ const EventShowcase = () => {
           <button
             className={`px-6 py-2 rounded-full transition-all ${
               activeCategory === "Technology"
-                ? "bg-[#6A5F7E] text-white"
+                ? "bg-[#6A5F7E] text-white active"
                 : "bg-[#1C1C2E] text-gray-400 hover:bg-[#6A5F7E] hover:text-white"
             }`}
             onClick={() => setActiveCategory("Technology")}
@@ -110,7 +110,7 @@ const EventShowcase = () => {
           <button
             className={`px-6 py-2 rounded-full transition-all ${
               activeCategory === "Business"
-                ? "bg-[#6A5F7E] text-white"
+                ? "bg-[#6A5F7E] text-white active"
                 : "bg-[#1C1C2E] text-gray-400 hover:bg-[#6A5F7E] hover:text-white"
             }`}
             onClick={() => setActiveCategory("Business")}
@@ -120,7 +120,7 @@ const EventShowcase = () => {
           <button
             className={`px-6 py-2 rounded-full transition-all ${
               activeCategory === "Music"
-                ? "bg-[#6A5F7E] text-white"
+                ? "bg-[#6A5F7E] text-white active"
                 : "bg-[#1C1C2E] text-gray-400 hover:bg-[#6A5F7E] hover:text-white"
             }`}
             onClick={() => setActiveCategory("Music")}
@@ -130,7 +130,7 @@ const EventShowcase = () => {
           <button
             className={`px-6 py-2 rounded-full transition-all ${
               activeCategory === "Arts"
-                ? "bg-[#6A5F7E] text-white"
+                ? "bg-[#6A5F7E] text-white active"
                 : "bg-[#1C1C2E] text-gray-400 hover:bg-[#6A5F7E] hover:text-white"
             }`}
             onClick={() => setActiveCategory("Arts")}

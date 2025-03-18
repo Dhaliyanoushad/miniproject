@@ -46,16 +46,16 @@
 }
 
 .category-filter button:hover {
-  background: rgba(134, 106, 154, 0.2);
-  color: #ffffff;
+  /* background: rgba(134, 106, 154, 0.2);
+  color: #ffffff; */
   border-color: #ffffff;
   box-shadow: 0 0 15px rgba(134, 106, 154, 0.8);
 }
 
 .category-filter button.active {
-  background: linear-gradient(45deg, #7a3b69, #9a879d);
-  border-color: transparent;
-  color: white;
+  /* background: linear-gradient(45deg, #7a3b69, #9a879d); */
+  border-color: white;
+  /* color: white; */
   font-weight: 600;
 }
 
