@@ -1,10 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
+
 .hero-section {
   position: relative;
   width: 100%;
   height: 100vh;
   color: white;
-  font-family: "Poppins", sans-serif;
+  font-family: "Outfit", sans-serif;
   overflow: hidden;
+  scroll-margin-top: 80px; /* Adjust according to navbar height */
+  /* background: linear-gradient(45deg, #0a0e17, #0f1730, #0a0e17); */
 }
 
 .hero-image {
@@ -16,12 +20,14 @@
   background-size: cover;
   background-position: center;
   z-index: -1;
+  /* filter: contrast(1.1) brightness(0.9); */
 }
 
 .image-overlay {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
   width: 100%;
   height: 100%;
+  backdrop-filter: blur(3px);
 }
 
 .hero-content {
@@ -34,18 +40,32 @@
 }
 
 .hero-content h1 {
-  font-size: 4rem;
-  font-weight: bold;
-  line-height: 1.2;
+  font-size: 5rem;
+  font-weight: 500;
+  line-height: 1.1;
+  margin-bottom: 0;
+  letter-spacing: -0.5px;
+  color: #f0f0f0;
+  z-index: 9;
+
+  /* text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to bottom, #ffffff, #b8b8b8);
+  -webkit-background-clip: text; */
+  /* background-clip: text; */
+  /* color: transparent; */
 }
 
 .hero-content p {
-  font-size: 1.2rem;
-  margin: 15px 0;
+  font-size: 1rem;
+  margin: 15px 0 30px 0;
   max-width: 600px;
+  opacity: 0.6;
+  line-height: 1.6;
+  letter-spacing: 0.2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* ✅ Ensure only buttons inside the hero section get the effect */
+/* Ensure only buttons inside the hero section get the effect */
 .hero-buttons {
   display: flex;
   gap: 20px;
@@ -58,34 +78,39 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s;
+  font-weight: 500;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
 }
 
 .hero-buttons .explore-btn {
-  background-color: #ffffff;
+  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
   color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hero-buttons .explore-btn:hover {
-  background-color: #f39c12;
-  color: #fff;
-  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2), 0 6px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px) scale(1.05);
 }
 
 .hero-buttons .get-app-btn {
   background: linear-gradient(45deg, #ff6ec4, #7873f5);
   color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hero-buttons .get-app-btn:hover {
-  transform: scale(1.05);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 20px rgba(120, 115, 245, 0.3), 0 6px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ Prevent navbar links from being affected */
+/* Prevent navbar links from being affected */
 .navbar a:hover {
   transform: none !important;
   background: none !important;
   color: #fff;
 }
+
 /* Image grid layout for hero section */
 .hero-images-container {
   position: absolute;
@@ -114,7 +139,10 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+  filter: brightness(1.05) contrast(1.05) grayscale(1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .formal-event {
@@ -130,4 +158,31 @@
 .dinner-event {
   border-radius: 0 24px 24px 24px;
   height: 520px; /* Matches combined height of both left images plus the gap */
+}
+
+.event-images:hover {
+  transform: scale(1.03);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.1) contrast(1.08);
+}
+
+/* Add subtle gradient overlay to images */
+.formal-event,
+.holiday-decor,
+.dinner-event {
+  position: relative;
+}
+
+.formal-event::after,
+.holiday-decor::after,
+.dinner-event::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+  pointer-events: none;
 }

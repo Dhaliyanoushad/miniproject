@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import "./Hero.css";
 import dj from "../../assets/dj.jpg";
-import eventImage from "../../assets/pdisco.jpg";
+import { useNavigate } from "react-router-dom";
 
-const HeroSection = () => {
+const Hero = () => {
   const heroRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -20,35 +21,50 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="hero-section">
+    <div id="home" className="hero-section">
       <div className="hero-content" ref={heroRef}>
         <h1>
-          Turn Moments
-          <br /> into Memories
+          Discover. Participate. <br /> Elevate Your College Life!
         </h1>
-        <p>Your one-stop solution for seamless event management.</p>
+        <p>
+          Stay updated with upcoming events, register with ease, and create
+          unforgettable experiences on campus.
+        </p>
         <div className="hero-buttons">
-          <button className="explore-btn">Explore</button>
-          <button className="get-app-btn">Get App</button>
+          <button className="explore-btn" onClick={() => navigate("/events")}>
+            Explore Events
+          </button>
+          <button
+            className="get-app-btn"
+            onClick={() => navigate("/loginhost")}
+          >
+            Host an Event
+          </button>
         </div>
       </div>
       <div className="hero-images-container">
         <div className="left-column">
           <img
-            src={eventImage}
-            alt="Elegant event with people on stairs"
+            src={
+              "https://i.pinimg.com/736x/b8/27/72/b82772b767aba5dc69eb6c182d93ff0e.jpg"
+            }
+            alt="Students enjoying a college fest"
             className="event-images formal-event"
           />
           <img
-            src={eventImage}
-            alt="Holiday decorations with gold ornaments"
+            src={
+              "https://i.pinimg.com/736x/4e/f3/87/4ef387171d07be5516198c780b84e124.jpg"
+            }
+            alt="Workshops and competitions happening"
             className="event-images holiday-decor"
           />
         </div>
         <div className="right-column">
           <img
-            src={eventImage}
-            alt="People enjoying dinner event"
+            src={
+              "https://i.pinimg.com/736x/5c/10/43/5c10434dd62c1ba01fbb28aaf096c642.jpg"
+            }
+            alt="Music festival on campus"
             className="event-images dinner-event"
           />
         </div>
@@ -61,4 +77,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection;
+export default Hero;
