@@ -1,21 +1,33 @@
 import React, { useEffect, useState } from "react";
-import "./Navbar.css";
-import logo from "/icon.svg";
 import { useNavigate } from "react-router-dom";
+import logo from "/icon.svg";
+import "./Navbar.css";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSection, setActiveSection] = useState("home");
 
   // ✅ Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 50);
+
+      // ✅ Detect which section is in view
+      const sections = ["home", "events", "portfolio", "about", "contact"];
+      let currentSection = "home"; // Default
+
+      sections.forEach((id) => {
+        const section = document.getElementById(id);
+        if (section) {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= 100 && rect.bottom >= 100) {
+            currentSection = id;
+          }
+        }
+      });
+
+      setActiveSection(currentSection);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -31,37 +43,33 @@ const Navbar = () => {
 
   return (
     <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-      <img src={logo} alt="Logo" className="logo" />
+      <img src={logo} alt="Campus Events" className="logo" />
 
       <ul className="nav-links">
-        <li>
-          <a onClick={() => handleScrollToSection("home")}>Home</a>
-        </li>
-        <li>
-          <a onClick={() => handleScrollToSection("services")}>Events</a>
-        </li>
-        <li>
-          <a onClick={() => handleScrollToSection("portfolio")}>About</a>
-        </li>
-        <li>
-          <a onClick={() => handleScrollToSection("contact")}>Contact</a>
-        </li>
-        <li>
-          <a onClick={() => handleScrollToSection("contact")}>Dools</a>
-        </li>
+        {["home", "events", "portfolio", "about", "contact"].map((id) => (
+          <li key={id}>
+            <a
+              onClick={() => handleScrollToSection(id)}
+              className={activeSection === id ? "active-link" : ""}
+            >
+              {id.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase())}{" "}
+              {/* Capitalize */}
+            </a>
+          </li>
+        ))}
       </ul>
 
-      {/* ✅ Transparent Search Bar */}
+      {/* ✅ Search Bar for Finding Events */}
       <input
         type="text"
         className="search-bar"
-        placeholder="Search..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search events..."
+        value={""} // Remove searchQuery if not needed
+        onChange={() => {}}
       />
 
-      <button className="cta-button" onClick={() => navigate("/signin")}>
-        Register
+      <button className="cta-button" onClick={() => navigate("/register")}>
+        Register Now
       </button>
     </nav>
   );

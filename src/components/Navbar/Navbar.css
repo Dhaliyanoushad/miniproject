@@ -71,10 +71,12 @@
   font-size: 18px;
   transition: all 0.3s;
   white-space: nowrap; /* Prevent text wrapping */
+  cursor: pointer;
 }
 
-.navbar .nav-links li a:hover {
-  color: #f39c12;
+.navbar .nav-links li a:hover,
+.navbar .nav-links .active-link {
+  color: #c6c5f4;
   transform: scale(1.05);
 }
 
@@ -85,7 +87,7 @@
   border-radius: 30px;
   background: linear-gradient(45deg, #ff6ec4, #7873f5);
   color: white;
-  font-size: 18px; /* Slightly larger text */
+  font-size: 16px; /* Slightly larger text */
   cursor: pointer;
   transition: all 0.3s;
   flex-shrink: 0; /* Prevent button from shrinking */
@@ -93,8 +95,8 @@
 }
 
 .navbar .cta-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(45deg, #f39c12, #f559c4);
+  transform: scale(1.03);
+  border: 1px solid white;
 }
 
 /* ✅ Sticky navbar effect */
@@ -103,28 +105,4 @@
   backdrop-filter: blur(20px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   padding: 15px 40px;
-}
-
-/* Add responsive adjustments */
-@media (max-width: 768px) {
-  .navbar {
-    padding: 15px 20px;
-  }
-
-  .logo {
-    height: 50px; /* Reduce logo size for smaller screens */
-    width: 50px;
-  }
-
-  .navbar .nav-links {
-    gap: 20px;
-  }
-
-  .navbar .nav-links li a {
-    font-size: 16px;
-  }
-
-  .navbar .cta-button {
-    padding: 12px 24px;
-  }
 }
