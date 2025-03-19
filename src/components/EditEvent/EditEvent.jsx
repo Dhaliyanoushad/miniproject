@@ -1,21 +1,43 @@
-import React, { useState } from "react";
-import "./PostEvent.css"; // Importing the styles
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const PostEvent = () => {
+const EditEvent = () => {
   const navigate = useNavigate();
+  const { eventId } = useParams(); // Get event ID from URL
   const [eventData, setEventData] = useState({
     title: "",
     description: "",
     date: "",
     time: "",
     location: "",
-    limit: "",
     category: "",
     image: null,
   });
 
   const [preview, setPreview] = useState(null);
+
+  useEffect(() => {
+    // Fetch event details from backend (Replace with actual API call)
+    const fetchEventDetails = async () => {
+      try {
+        // Simulating API response
+        const fakeEvent = {
+          title: "Tech Conference 2025",
+          description: "A conference on emerging technologies.",
+          date: "2025-04-15",
+          time: "10:00",
+          location: "Silicon Valley Convention Center",
+          category: "Technology",
+          image: null,
+        };
+        setEventData(fakeEvent);
+      } catch (error) {
+        console.error("Error fetching event details:", error);
+      }
+    };
+
+    fetchEventDetails();
+  }, [eventId]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -40,10 +62,12 @@ const PostEvent = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Upcoming Event Data:", eventData);
+    console.log("Updated Event Data:", eventData);
     navigate("/hostdashboard");
-    // Here you would typically send the data to your backend
+    // Send updated event data to backend
   };
+
+  // Handle go back
   const handleGoBack = () => {
     navigate("/hostdashboard");
   };
@@ -51,7 +75,7 @@ const PostEvent = () => {
   return (
     <div className="post-event hostd">
       <div className="event-container">
-        <h2 className="event-title">Create Event</h2>
+        <h2 className="event-title">Edit Event</h2>
         <form onSubmit={handleSubmit} className="event-form">
           {/* Event Title */}
           <input
@@ -132,7 +156,9 @@ const PostEvent = () => {
           </select>
           {/* Image Upload */}
           <div className="event-file-group">
-            <label className="event-file-label">Upload Event Imagery</label>
+            <label className="event-file-label">
+              Upload New Image (Optional)
+            </label>
             <input
               type="file"
               accept="image/*"
@@ -157,7 +183,7 @@ const PostEvent = () => {
               Cancel
             </button>
             <button type="submit" className="event-btn flex-1">
-              Create Experience
+              Update Event
             </button>
           </div>
         </form>
@@ -166,4 +192,4 @@ const PostEvent = () => {
   );
 };
 
-export default PostEvent;
+export default EditEvent;

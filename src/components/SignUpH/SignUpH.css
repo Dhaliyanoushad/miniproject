@@ -1,0 +1,179 @@
+/* Auth Container */
+.sh-auth {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #0c0b1b; /* Dark background (Russian Violet) - matched from lh-auth */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.sh-auth > * {
+  margin-top: 100px;
+}
+
+/* Left Side */
+.sh-auth__left {
+  flex: 1;
+  background-image: url("https://i.pinimg.com/736x/7a/40/07/7a4007251e2ded3352a0ff7e3eb1636b.jpg");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 40px;
+}
+
+/* Right Side */
+.sh-auth__right {
+  flex: 1;
+  padding: 60px 100px;
+  background: #0f0e21; /* Matched with lh-auth__right */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Titles & Headings */
+.sh-auth__title,
+.sh-auth__heading {
+  font-size: 26px;
+  font-weight: bold;
+  color: #d2cce7; /* Lavender (Web) - matched from lh-auth */
+}
+
+/* Form */
+.sh-auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Inputs */
+.sh-auth__input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #866a9a; /* Pomp and Power - matched from lh-auth */
+  border-radius: 6px;
+  font-size: 14px;
+  background: #261646; /* Russian Violet - matched from lh-auth */
+  color: #d2cce7; /* Light text - matched from lh-auth */
+  transition: 0.3s;
+}
+
+.sh-auth__input:focus {
+  border-color: #aec0e4; /* Powder Blue - matched from lh-auth */
+  outline: none;
+  box-shadow: 0px 0px 8px rgba(69, 73, 120, 0.4);
+}
+
+/* File Upload */
+.sh-auth__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Hide default file input */
+.sh-auth__file-input {
+  display: none;
+}
+
+/* Custom file upload button */
+.sh-auth__label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #d2cce7; /* Lavender (Web) - matched from lh-auth */
+  margin-bottom: 5px;
+}
+
+.sh-auth__file-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #866a9a; /* Pomp and Power - matched from lh-auth */
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  background: #261646; /* Russian Violet - matched from lh-auth */
+  width: 100%;
+}
+
+.sh-auth__file-label {
+  background: #454978; /* Marian Blue - matched from lh-auth button */
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.sh-auth__file-label:hover {
+  background: #866a9a; /* Pomp and Power - matched from lh-auth button hover */
+}
+
+.sh-auth__file-name {
+  font-size: 14px;
+  color: #d2cce7; /* Soft Lavender - matched from lh-auth */
+}
+
+/* Image Preview */
+.sh-auth__image-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid #866a9a; /* Pomp and Power - matched from lh-auth */
+}
+
+/* Checkbox */
+.sh-auth__checkbox {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #d2cce7; /* Light text - matched from lh-auth */
+}
+
+.sh-auth__checkbox-input {
+  margin-right: 8px;
+}
+
+.sh-auth__checkbox-label a {
+  color: #aec0e4; /* Powder Blue - matched from lh-auth */
+  text-decoration: none;
+}
+
+/* Buttons */
+.sh-auth__btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.sh-auth__btn--primary {
+  background: #454978; /* Marian Blue - matched from lh-auth */
+  color: white;
+}
+
+.sh-auth__btn--primary:hover {
+  background: #866a9a; /* Pomp and Power - matched from lh-auth */
+}
+
+/* Login Text */
+.sh-auth__login-text {
+  margin-top: 0;
+  font-size: 14px;
+  text-align: center;
+  color: #d2cce7; /* Light text - matched from lh-auth */
+}
+
+.sh-auth__login-text a {
+  cursor: pointer;
+  color: #aec0e4; /* Powder Blue - matched from lh-auth */
+  text-decoration: none;
+}
+
+.sh-auth__login-text a:hover {
+  text-decoration: underline;
+}
