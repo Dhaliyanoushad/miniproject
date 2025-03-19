@@ -116,12 +116,6 @@ const Features = () => {
           </p>
         </div>
       </div>
-
-      <div className="card-cta-section">
-        <button className="card-cta-button" onClick={handleClick}>
-          Get Started
-        </button>
-      </div>
     </div>
   );
 };
