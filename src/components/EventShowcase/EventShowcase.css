@@ -1,0 +1,161 @@
+/* Dark Purple Theme */
+.event-showcase {
+  padding: 100px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section-title {
+  font-size: 42px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+/* Category Filter - Neon Glow Hover Effect */
+.category-filter {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.category-filter button {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #866a9a;
+  border-radius: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #d2cce7;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease-in-out;
+}
+
+.category-filter button:hover {
+  /* background: rgba(134, 106, 154, 0.2);
+  color: #ffffff; */
+  border-color: #ffffff;
+  box-shadow: 0 0 15px rgba(134, 106, 154, 0.8);
+}
+
+.category-filter button.active {
+  /* background: linear-gradient(45deg, #7a3b69, #9a879d); */
+  border-color: white;
+  /* color: white; */
+  font-weight: 600;
+}
+
+/* Event Grid - More Spacing & Clean Layout */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+/* Event Cards - Glassmorphism with Soft Glow */
+.event-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.event-image {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.event-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.event-card:hover .event-image img {
+  transform: scale(1.08);
+}
+
+.event-date {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.event-details {
+  padding: 25px;
+}
+
+.event-details h3 {
+  margin: 0 0 15px 0;
+  font-size: 22px;
+  font-weight: bold;
+  color: #d2cce7;
+}
+
+.event-details p {
+  color: #cfcfcd;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Button - Neon Effect */
+.view-details-btn {
+  background: transparent;
+  border: 2px solid #7a3b69;
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.view-details-btn:hover {
+  color: white;
+  box-shadow: 0 0 10px rgba(122, 59, 105, 0.8);
+  border-color: #563440;
+}
+
+/* No Events Message */
+.no-events {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  color: #cfcfcd;
+}

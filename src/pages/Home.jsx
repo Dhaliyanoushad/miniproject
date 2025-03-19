@@ -5,8 +5,8 @@ import Features from "../components/Features/Features";
 import Portfolio from "../components/Portfolio/Portfolio";
 import Events from "../components/Events/Events";
 import Contact from "../components/Contact/Contact";
-import TicketCounter from "../components/Test/Test";
 import Footer from "../components/Footer/Footer";
+import TicketCounter from "../components/TicketCounter/TicketCounter";
 
 const Home = () => {
   return (

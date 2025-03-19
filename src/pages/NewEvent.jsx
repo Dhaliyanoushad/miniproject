@@ -1,16 +1,15 @@
 import React from "react";
+import PostEvent from "../components/PostEvent/PostEvent";
 import Navbar from "../components/Navbar/Navbar";
-import EventShowcase from "../components/EventShowcase/EventShowcase";
 import Footer from "../components/Footer/Footer";
 
-const Events = () => {
+const NewEvent = () => {
   return (
     <>
-      <Navbar />
-      <EventShowcase />
+      <PostEvent />
       <Footer />
     </>
   );
 };
 
-export default Events;
+export default NewEvent;
