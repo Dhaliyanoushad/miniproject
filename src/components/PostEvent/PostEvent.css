@@ -1,0 +1,243 @@
+/* PostEvent.css - Luxury Purple Theme */
+.hostd {
+  background: linear-gradient(
+      135deg,
+      rgba(15, 14, 33, 0.9),
+      rgba(45, 26, 69, 0.9)
+    ),
+    url("https://i.pinimg.com/736x/9b/90/f9/9b90f922c3bbceb1c3c37d2b7bd756f2.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.post-event {
+  height: 100%;
+  min-height: 100vh;
+  width: 100%;
+
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main container */
+.event-container {
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+  background-color: rgba(20, 18, 38, 0.85);
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(134, 106, 175, 0.2);
+  padding: 50px 40px;
+  border: 1px solid rgba(163, 137, 209, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+/* Page title styling */
+.event-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 40px;
+  text-align: center;
+  position: relative;
+  padding-bottom: 16px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 10px rgba(128, 94, 185, 0.5);
+}
+
+.event-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #8050e3, #bc6ff1);
+  border-radius: 2px;
+}
+
+/* Form styling */
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Input fields */
+.event-input {
+  width: 100%;
+  padding: 16px 18px;
+  background-color: rgba(35, 28, 60, 0.8);
+  border: 1px solid rgba(163, 137, 209, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  font-family: "Inter", sans-serif;
+}
+
+.event-input:focus {
+  outline: none;
+  border-color: #bc6ff1;
+  box-shadow: 0 0 0 3px rgba(188, 111, 241, 0.2);
+}
+
+.event-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Select dropdown styling */
+select.event-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23bc6ff1' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 16px) center;
+  padding-right: 40px;
+}
+
+/* Textarea styling */
+textarea.event-input {
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* Flex container for date and time */
+.event-flex {
+  display: flex;
+  gap: 16px;
+}
+
+.event-flex .event-input {
+  flex: 1;
+}
+
+/* File upload styling */
+.event-file-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-file-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #d5c6f2;
+  margin-bottom: 5px;
+  letter-spacing: 0.3px;
+}
+
+.event-file-input {
+  color: #ffffff;
+  padding: 12px 0;
+}
+
+.event-file-input::-webkit-file-upload-button {
+  background: linear-gradient(45deg, #8050e3, #bc6ff1);
+  color: #ffffff;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  margin-right: 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.event-file-input::-webkit-file-upload-button:hover {
+  background: linear-gradient(45deg, #9262e9, #c989f2);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(156, 98, 233, 0.4);
+}
+
+/* Image preview */
+.event-preview {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 15px;
+  border: 1px solid rgba(163, 137, 209, 0.3);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Submit button */
+.event-btn {
+  background: linear-gradient(45deg, #8050e3, #bc6ff1);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  box-shadow: 0 5px 20px rgba(128, 80, 227, 0.4);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.event-btn:hover {
+  background: linear-gradient(45deg, #9262e9, #c989f2);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(128, 80, 227, 0.6);
+}
+
+/* Custom date and time input styles */
+input[type="date"],
+input[type="time"] {
+  color: #ffffff;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(215deg);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+/* Error states for validation */
+.event-input:invalid:not(:placeholder-shown) {
+  border-color: #ff6b6b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .event-container {
+    margin: 20px;
+    padding: 40px 25px;
+  }
+
+  .event-flex {
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .event-title {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-event {
+    padding: 20px 15px;
+  }
+
+  .event-container {
+    padding: 30px 20px;
+  }
+
+  .event-title {
+    font-size: 24px;
+  }
+
+  .event-input {
+    padding: 14px 16px;
+  }
+}
