@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "/icon.svg";
 import "./Navbar.css";
@@ -40,10 +40,24 @@ const Navbar = () => {
       block: "start",
     });
   };
+  const logoRef = useRef(null);
+
+  const handleLogoClick = () => {
+    logoRef.current.classList.add("animate");
+    setTimeout(() => {
+      logoRef.current.classList.remove("animate");
+    }, 2000); // Duration of the animation
+  };
 
   return (
     <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-      <img src={logo} alt="Campus Events" className="logo" />
+      <img
+        src={logo}
+        alt="Campus Events"
+        className="logo"
+        ref={logoRef}
+        onClick={handleLogoClick}
+      />
 
       <ul className="nav-links">
         {["home", "events", "portfolio", "about", "contact"].map((id) => (

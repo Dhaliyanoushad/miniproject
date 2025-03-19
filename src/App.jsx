@@ -13,7 +13,6 @@ import HostDashboard from "./pages/HostDashboard";
 import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import GuestDashboard from "./pages/GuestDashboard";
-import BookTicket from "./pages/BookTicket";
 import Test from "./pages/Test";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -47,7 +46,6 @@ const App = () => {
 
           {/* Guest Dashboard */}
           <Route path="/guestdashboard" element={<GuestDashboard />} />
-          <Route path="/bookticket" element={<BookTicket />} />
           {/* Register Routes */}
           <Route path="/register" element={<Register />} />
           <Route path="/loginhost" element={<LoginHost />} />
