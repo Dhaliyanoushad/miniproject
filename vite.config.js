@@ -6,3 +6,4 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
 });
+const API_BASE_URL = "http://localhost:5000";
