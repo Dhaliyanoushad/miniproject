@@ -190,27 +190,39 @@ const GuestD = () => {
           {/* Search Bar for Upcoming Events */}
           {activeTab === "upcoming" && (
             <div className="relative mb-6">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <select
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
+      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
+              >
+                <option value="" className="bg-[#261646]">
+                  All Event Types
+                </option>
+                <option value="Startup" className="bg-[#261646]">
+                  Startup
+                </option>
+                <option value="Technology" className="bg-[#261646]">
+                  Technology
+                </option>
+                <option value="AI" className="bg-[#261646]">
+                  AI
+                </option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
                 <svg
-                  className="w-5 h-5 text-pink-200"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+                  className="w-5 h-5"
                   xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
                 >
                   <path
                     fillRule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
                     clipRule="evenodd"
-                  ></path>
+                  />
                 </svg>
               </div>
-              <input
-                type="text"
-                placeholder="Search by event type..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
-              />
             </div>
           )}
 
