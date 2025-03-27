@@ -73,15 +73,6 @@ const Navbar = () => {
         ))}
       </ul>
 
-      {/* ✅ Search Bar for Finding Events */}
-      <input
-        type="text"
-        className="search-bar"
-        placeholder="Search events..."
-        value={""} // Remove searchQuery if not needed
-        onChange={() => {}}
-      />
-
       <button className="cta-button" onClick={() => navigate("/register")}>
         Register Now
       </button>

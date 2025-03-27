@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Ticket from "./Ticket"; // Import the Ticket component
 import TicketBookingConfirmation from "./TicketBookingConfirmation"; // Import the new component
+import { useNavigate } from "react-router-dom";
 
 const GuestD = () => {
   const [registeredEvents, setRegisteredEvents] = useState([]);
@@ -120,6 +121,7 @@ const GuestD = () => {
     setActiveTab("registered");
   };
 
+  const navigate = useNavigate();
   const filteredUpcomingEvents = upcomingEvents.filter((event) =>
     event.type.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -169,7 +171,10 @@ const GuestD = () => {
         </div>
 
         <div className="mt-auto w-full pt-6">
-          <button className="w-full bg-[#7A3B69]/60 hover:bg-[#7A3B69]/80 py-3 rounded-lg font-bold shadow-lg shadow-[#7A3B69]/20 transition duration-300">
+          <button
+            onClick={() => navigate("/loginguest")}
+            className="w-full bg-[#7A3B69]/60 hover:bg-[#7A3B69]/80 py-3 rounded-lg font-bold shadow-lg shadow-[#7A3B69]/20 transition duration-300"
+          >
             Logout
           </button>
         </div>
