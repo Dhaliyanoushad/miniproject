@@ -18,6 +18,7 @@ import HostDashboard from "./pages/HostDashboard";
 import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import GuestDashboard from "./pages/GuestDashboard";
+import SuperAdminDashboard from "./pages/SuperAdmin";
 
 // Preloader Component
 const Preloader = () => {
@@ -83,6 +84,8 @@ const AppContent = () => {
       ) : (
         <div>
           <Routes>
+            {/* Main Routes */}
+            <Route path="/efforstless" element={<SuperAdminDashboard />} />
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
             <Route path="/event/:id" element={<EventDetails />} />
