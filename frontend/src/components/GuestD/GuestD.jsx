@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import Ticket from "./Ticket"; // Import the Ticket component
-import TicketBookingConfirmation from "./TicketBookingConfirmation"; // Import the new component
+import Ticket from "./Ticket";
+import TicketBookingConfirmation from "./TicketBookingConfirmation";
 import { useNavigate } from "react-router-dom";
 
 const GuestD = () => {
@@ -8,6 +8,11 @@ const GuestD = () => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("registered");
   const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState({
+    type: "none", // "none", "before", "after", "between"
+    date1: "",
+    date2: "",
+  });
   const [guestProfile, setGuestProfile] = useState({
     name: "Alex Morgan",
     joinDate: "March 2024",
@@ -15,7 +20,7 @@ const GuestD = () => {
       "https://i.pinimg.com/736x/16/e1/cb/16e1cb84a53ee8cb0e7d8fe72533568e.jpg",
   });
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const [bookingEvent, setBookingEvent] = useState(null); // New state for booking modal
+  const [bookingEvent, setBookingEvent] = useState(null);
 
   useEffect(() => {
     const dummyRegisteredEvents = [
@@ -69,6 +74,28 @@ const GuestD = () => {
     setUpcomingEvents(dummyUpcomingEvents);
   }, []);
 
+  const filterEventsByDate = (events) => {
+    if (dateFilter.type === "none") return events;
+
+    return events.filter((event) => {
+      const eventDate = new Date(event.date);
+
+      switch (dateFilter.type) {
+        case "before":
+          return eventDate < new Date(dateFilter.date1);
+        case "after":
+          return eventDate > new Date(dateFilter.date1);
+        case "between":
+          return (
+            eventDate > new Date(dateFilter.date1) &&
+            eventDate < new Date(dateFilter.date2)
+          );
+        default:
+          return true;
+      }
+    });
+  };
+
   const handleViewTicket = (eventId) => {
     const event = registeredEvents.find((event) => event.id === eventId);
     if (event) {
@@ -97,34 +124,25 @@ const GuestD = () => {
     setBookingEvent(null);
   };
 
-  // Handle confirmation of a new booking
   const handleConfirmBooking = (confirmedEvent) => {
-    // Add to registered events with a new ID
     const newRegisteredEvent = {
       ...confirmedEvent,
-      // Generate a higher ID than existing events
       id:
         Math.max(...[...registeredEvents, ...upcomingEvents].map((e) => e.id)) +
         1,
     };
 
     setRegisteredEvents((prev) => [...prev, newRegisteredEvent]);
-
-    // Remove from upcomingEvents or keep it (depending on requirements)
-    // If you want to keep it in upcoming events, comment out the next line
-    // setUpcomingEvents(prev => prev.filter(event => event.id !== confirmedEvent.id));
-
-    // Show a success message (could be implemented as a toast notification)
     console.log(`Successfully booked ticket for ${confirmedEvent.name}`);
-
-    // Optional: Switch to registered events tab
     setActiveTab("registered");
   };
 
   const navigate = useNavigate();
-  const filteredUpcomingEvents = upcomingEvents.filter((event) =>
-    event.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUpcomingEvents = upcomingEvents
+    .filter((event) =>
+      event.type.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter(filterEventsByDate);
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-[#261646] to-[#13001E] text-white">
@@ -192,42 +210,114 @@ const GuestD = () => {
 
         {/* Content Area */}
         <div className="mt-8">
-          {/* Search Bar for Upcoming Events */}
+          {/* Search Bar and Date Filter for Upcoming Events */}
           {activeTab === "upcoming" && (
-            <div className="relative mb-6">
-              <select
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
-              >
-                <option value="" className="bg-[#261646]">
-                  All Event Types
-                </option>
-                <option value="Startup" className="bg-[#261646]">
-                  Startup
-                </option>
-                <option value="Technology" className="bg-[#261646]">
-                  Technology
-                </option>
-                <option value="AI" className="bg-[#261646]">
-                  AI
-                </option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
-                <svg
-                  className="w-5 h-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              {/* Event Type Filter */}
+              <div className="relative flex-1">
+                <select
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
+                    focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                  <option value="" className="bg-[#261646]">
+                    All Event Types
+                  </option>
+                  <option value="Startup" className="bg-[#261646]">
+                    Startup
+                  </option>
+                  <option value="Technology" className="bg-[#261646]">
+                    Technology
+                  </option>
+                  <option value="AI" className="bg-[#261646]">
+                    AI
+                  </option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
+                  <svg
+                    className="w-5 h-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
               </div>
+
+              {/* Date Filter Type */}
+              <div className="relative">
+                <select
+                  value={dateFilter.type}
+                  onChange={(e) =>
+                    setDateFilter({ ...dateFilter, type: e.target.value })
+                  }
+                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
+                    focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
+                >
+                  <option value="none" className="bg-[#261646]">
+                    All Dates
+                  </option>
+                  <option value="before" className="bg-[#261646]">
+                    Before Date
+                  </option>
+                  <option value="after" className="bg-[#261646]">
+                    After Date
+                  </option>
+                  <option value="between" className="bg-[#261646]">
+                    Between Dates
+                  </option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
+                  <svg
+                    className="w-5 h-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Date input 1 */}
+              {dateFilter.type !== "none" && (
+                <div className="relative flex-1">
+                  <input
+                    type="date"
+                    value={dateFilter.date1}
+                    onChange={(e) =>
+                      setDateFilter({ ...dateFilter, date1: e.target.value })
+                    }
+                    className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
+                      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
+                  />
+                </div>
+              )}
+
+              {/* Date input 2 (only for between filter) */}
+              {dateFilter.type === "between" && (
+                <div className="relative flex-1">
+                  <input
+                    type="date"
+                    value={dateFilter.date2}
+                    onChange={(e) =>
+                      setDateFilter({ ...dateFilter, date2: e.target.value })
+                    }
+                    className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
+                      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
+                  />
+                </div>
+              )}
             </div>
           )}
 

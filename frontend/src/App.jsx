@@ -85,7 +85,10 @@ const AppContent = () => {
         <div>
           <Routes>
             {/* Main Routes */}
-            <Route path="/efforstless" element={<SuperAdminDashboard />} />
+            <Route
+              path={`/${import.meta.env.VITE_SUPER_ADMIN}`}
+              element={<SuperAdminDashboard />}
+            />
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
             <Route path="/event/:id" element={<EventDetails />} />
