@@ -19,6 +19,7 @@ import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import GuestDashboard from "./pages/GuestDashboard";
 import SuperAdminDashboard from "./pages/SuperAdmin";
+import Test from "./pages/Test";
 
 // Preloader Component
 const Preloader = () => {
@@ -85,6 +86,7 @@ const AppContent = () => {
         <div>
           <Routes>
             {/* Main Routes */}
+            <Route path="/test" element={<Test />} />
             <Route
               path={`/${import.meta.env.VITE_SUPER_ADMIN}`}
               element={<SuperAdminDashboard />}
