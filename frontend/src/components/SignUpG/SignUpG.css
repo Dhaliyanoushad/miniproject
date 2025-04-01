@@ -1,177 +1,112 @@
-/* Auth Container */
-.sg-auth {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  background: #040405; /* Dark Background */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-}
-.sg-auth > * {
-  margin-top: 100px;
-}
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-/* Left Side */
-.sg-auth__left {
-  flex: 1;
-  background-image: url("https://i.pinimg.com/736x/7a/40/07/7a4007251e2ded3352a0ff7e3eb1636b.jpg");
-  background-size: cover;
-  background-position: center;
-  color: white;
-  padding: 40px;
-}
+const SignUpG = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    collageName: "",
+    studentIdNumber: "",
+  });
 
-/* Right Side */
-.sg-auth__right {
-  flex: 1;
-  padding: 60px 100px;
-  background: #0f0f10; /* Soft Black */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-/* Titles & Headings */
-.sg-auth__title,
-.sg-auth__heading {
-  font-size: 26px;
-  font-weight: bold;
-  color: #b8a0c9; /* Muted Lavender */
-}
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/users/signup",
+        formData
+      );
+      alert(response.data.msg);
+      navigate("/loginguest");
+    } catch (err) {
+      alert(err.response?.data?.msg || "Something went wrong");
+    }
+  };
 
-/* Form */
-.sg-auth__form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
+  return (
+    <div className="flex w-full h-screen bg-[#040405] shadow-lg">
+      {/* Left Side */}
+      <div className="flex-1 bg-cover bg-center text-white p-10" style={{ backgroundImage: "url('https://i.pinimg.com/736x/7a/40/07/7a4007251e2ded3352a0ff7e3eb1636b.jpg')" }}>
+      </div>
 
-/* Inputs */
-.sg-auth__input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #5c4b73; /* Muted Violet */
-  border-radius: 6px;
-  font-size: 14px;
-  background: #1a1a1d; /* Dark Gray */
-  color: #d2cce7; /* Soft Lavender */
-  transition: 0.3s;
-}
+      {/* Right Side */}
+      <div className="flex-1 p-14 bg-[#0f0f10] flex flex-col justify-center">
+        <h2 className="text-3xl font-bold text-[#b8a0c9]">Create Guest Account</h2>
+        <form className="flex flex-col gap-4 mt-8" onSubmit={handleSubmit}>
+          <input
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
+            type="text"
+            name="fullName"
+            placeholder="Full Name"
+            value={formData.fullName}
+            onChange={handleChange}
+          />
+          <input
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <input
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
+            type="password"
+            name="password"
+            placeholder="Create password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+          <input
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
+            type="text"
+            name="collageName"
+            placeholder="College Name"
+            value={formData.collageName}
+            onChange={handleChange}
+          />
+          <input
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
+            type="text"
+            name="studentIdNumber"
+            placeholder="Student ID Number"
+            value={formData.studentIdNumber}
+            onChange={handleChange}
+          />
+          <div className="flex items-center text-[#b8a0c9] text-sm">
+            <input
+              type="checkbox"
+              id="terms"
+              className="mr-2"
+            />
+            <label htmlFor="terms">
+              I agree with <a href="#" className="text-[#9a879d]">Terms</a> and{" "}
+              <a href="#" className="text-[#9a879d]">Privacy Policy</a>
+            </label>
+          </div>
+          <button className="w-full p-3 bg-[#5c4b73] text-white rounded-md mt-4 hover:bg-[#866a9a] transition-all">
+            Create Account
+          </button>
+          <p className="mt-4 text-sm text-center text-[#b8a0c9]">
+            Already have an account?{" "}
+            <a onClick={() => navigate("/loginguest")} className="text-[#9a879d] hover:underline cursor-pointer">
+              Log in
+            </a>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+};
 
-.sg-auth__input:focus {
-  border-color: #866a9a; /* Pomp and Power */
-  outline: none;
-  box-shadow: 0px 0px 8px rgba(134, 106, 154, 0.3);
-}
-
-/* File Upload */
-.sg-auth__form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Hide default file input */
-.sg-auth__file-input {
-  display: none;
-}
-
-/* Custom file upload button */
-.sg-auth__label {
-  font-size: 14px;
-  font-weight: bold;
-  color: #b8a0c9; /* Muted Lavender */
-  margin-bottom: 5px;
-}
-.sg-auth__file-upload {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #5c4b73; /* Muted Violet */
-  border-radius: 6px;
-  padding: 10px;
-  cursor: pointer;
-  background: #1a1a1d; /* Dark Gray */
-  width: 100%;
-}
-
-.sg-auth__file-label {
-  background: #5c4b73; /* Muted Violet */
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.sg-auth__file-label:hover {
-  background: #866a9a; /* Pomp and Power */
-}
-
-.sg-auth__file-name {
-  font-size: 14px;
-  color: #d2cce7; /* Soft Lavender */
-}
-
-/* Image Preview */
-.sg-auth__image-preview {
-  width: 100px;
-  height: 100px;
-  border-radius: 6px;
-  object-fit: cover;
-  border: 2px solid #5c4b73; /* Muted Violet */
-}
-
-/* Checkbox */
-.sg-auth__checkbox {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  color: #b8a0c9; /* Muted Lavender */
-}
-
-.sg-auth__checkbox-input {
-  margin-right: 8px;
-}
-
-.sg-auth__checkbox-label a {
-  color: #9a879d; /* Soft Byzantium */
-  text-decoration: none;
-}
-
-/* Buttons */
-.sg-auth__btn {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.sg-auth__btn--primary {
-  background: #5c4b73; /* Muted Violet */
-  color: white;
-}
-
-.sg-auth__btn--primary:hover {
-  background: #866a9a; /* Pomp and Power */
-}
-
-/* Login Text */
-.sg-auth__login-text {
-  margin-top: 0;
-  font-size: 14px;
-  text-align: center;
-  color: #b8a0c9; /* Muted Lavender */
-}
-
-.sg-auth__login-text a {
-  cursor: pointer;
-  color: #9a879d; /* Soft Byzantium */
-  text-decoration: none;
-}
-
-.sg-auth__login-text a:hover {
-  text-decoration: underline;
-}
+export default SignUpG;

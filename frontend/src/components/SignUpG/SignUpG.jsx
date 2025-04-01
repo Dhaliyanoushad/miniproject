@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "./SignUpG.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -35,13 +34,24 @@ const SignUpG = () => {
   };
 
   return (
-    <div className="sg-auth">
-      <div className="sg-auth__left"></div>
-      <div className="sg-auth__right">
-        <h2 className="sg-auth__heading">Create Guest Account</h2>
-        <form className="sg-auth__form" onSubmit={handleSubmit}>
+    <div className="flex w-full h-screen bg-[#040405] shadow-lg">
+      {/* Left Side */}
+      <div
+        className="flex-1 bg-cover bg-center text-white p-10"
+        style={{
+          backgroundImage:
+            "url('https://i.pinimg.com/736x/7a/40/07/7a4007251e2ded3352a0ff7e3eb1636b.jpg')",
+        }}
+      ></div>
+
+      {/* Right Side */}
+      <div className="flex-1 p-14 bg-[#0f0f10] flex flex-col justify-center">
+        <h2 className="text-3xl font-bold text-[#b8a0c9]">
+          Create Guest Account
+        </h2>
+        <form className="flex flex-col gap-4 mt-8" onSubmit={handleSubmit}>
           <input
-            className="sg-auth__input"
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
             type="text"
             name="fullName"
             placeholder="Full Name"
@@ -49,7 +59,7 @@ const SignUpG = () => {
             onChange={handleChange}
           />
           <input
-            className="sg-auth__input"
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
             type="email"
             name="email"
             placeholder="Enter your email"
@@ -57,7 +67,7 @@ const SignUpG = () => {
             onChange={handleChange}
           />
           <input
-            className="sg-auth__input"
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
             type="password"
             name="password"
             placeholder="Create password"
@@ -65,7 +75,7 @@ const SignUpG = () => {
             onChange={handleChange}
           />
           <input
-            className="sg-auth__input"
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
             type="text"
             name="collageName"
             placeholder="College Name"
@@ -73,30 +83,37 @@ const SignUpG = () => {
             onChange={handleChange}
           />
           <input
-            className="sg-auth__input"
+            className="w-full p-3 border border-[#5c4b73] rounded-md bg-[#1a1a1d] text-[#d2cce7] focus:outline-none focus:ring-2 focus:ring-[#866a9a]"
             type="text"
             name="studentIdNumber"
             placeholder="Student ID Number"
             value={formData.studentIdNumber}
             onChange={handleChange}
           />
-          <div className="sg-auth__checkbox">
-            <input
-              type="checkbox"
-              id="terms"
-              className="sg-auth__checkbox-input"
-            />
-            <label className="sg-auth__checkbox-label" htmlFor="terms">
-              I agree with <a href="#">Terms</a> and{" "}
-              <a href="#">Privacy Policy</a>
+          <div className="flex items-center text-[#b8a0c9] text-sm">
+            <input type="checkbox" id="terms" className="mr-2" />
+            <label htmlFor="terms">
+              I agree with{" "}
+              <a href="#" className="text-[#9a879d]">
+                Terms
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-[#9a879d]">
+                Privacy Policy
+              </a>
             </label>
           </div>
-          <button className="sg-auth__btn sg-auth__btn--primary" type="submit">
+          <button className="w-full p-3 bg-[#5c4b73] text-white rounded-md mt-4 hover:bg-[#866a9a] transition-all">
             Create Account
           </button>
-          <p className="sg-auth__login-text">
+          <p className="mt-4 text-sm text-center text-[#b8a0c9]">
             Already have an account?{" "}
-            <a onClick={() => navigate("/loginguest")}>Log in</a>
+            <a
+              onClick={() => navigate("/loginguest")}
+              className="text-[#9a879d] hover:underline cursor-pointer"
+            >
+              Log in
+            </a>
           </p>
         </form>
       </div>

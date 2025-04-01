@@ -23,17 +23,24 @@ const SignUpH = () => {
   // Handle file selection
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
+
+    // Basic validation
+    const { fullName, email, password, department, phoneNumber } = formData;
+    if (!fullName || !email || !password || !department || !phoneNumber) {
+      alert("Please fill all the fields.");
+      return;
+    }
+
     try {
       const response = await axios.post(
-        "http://localhost:5000/hosts/signup",
+        `${import.meta.env.VITE_BASE_URL}/users/signuphost`,
         formData
       );
       alert(response.data.msg);
-      navigate("/loginhost");
+      navigate("/hostdashboard"); // Redirect to host dashboard on success
     } catch (err) {
       console.log(err);
-
       alert(err.response?.data?.msg || "Something went wrong");
     }
   };

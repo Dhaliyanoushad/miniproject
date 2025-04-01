@@ -131,7 +131,7 @@ const PostEvent = () => {
             <option value="Fashion">Fashion & Style</option>
           </select>
           {/* Image Upload */}
-          <div className="event-file-group">
+          {/* <div className="event-file-group">
             <label className="event-file-label">Upload Event Imagery</label>
             <input
               type="file"
@@ -146,7 +146,7 @@ const PostEvent = () => {
                 className="event-preview"
               />
             )}
-          </div>
+          </div> */}
           {/* Submit and Cancel Buttons */}
           <div className="flex justify-between gap-4 mt-6">
             <button
