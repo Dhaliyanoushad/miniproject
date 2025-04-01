@@ -26,9 +26,6 @@ const HostSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
-    profilePicture: {
-      type: String, // URL to profile picture
-    },
     department: {
       type: String,
       required: true,
