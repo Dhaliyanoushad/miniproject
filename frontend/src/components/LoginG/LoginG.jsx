@@ -1,16 +1,40 @@
 import React, { useState } from "react";
 import "./LoginG.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const LoginG = () => {
   const navigate = useNavigate();
-  const [studentId, setStudentId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Logging in with:", studentId, password);
+    if (!email || !password) {
+      setError("Please enter both Email and Password.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/users/login",
+        { email, password },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        navigate("/guestdashboard");
+      } else {
+        setError("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      setError(
+        error.response?.data?.msg ||
+          "Login failed. Please check your credentials and try again."
+      );
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -24,13 +48,13 @@ const LoginG = () => {
         <p className="lg-auth__free">LOG IN TO CONTINUE</p>
         {/* <h2 className="lg-auth__heading">Login as Guest</h2> */}
         <form className="lg-auth__form" onSubmit={handleSubmit}>
-          {/* Student ID */}
+          {/* Email */}
           <input
             className="lg-auth__input"
             type="text"
-            placeholder="Enter your Student ID"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
+            placeholder="Enter your Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           {/* Password */}
@@ -54,13 +78,11 @@ const LoginG = () => {
           </div>
 
           {/* Login Button */}
-          <button
-            type="submit"
-            className="lg-auth__btn lg-auth__btn--primary"
-            onClick={() => navigate("/guestdashboard")}
-          >
+          <button type="submit" className="lg-auth__btn lg-auth__btn--primary">
             Log In
           </button>
+
+          {error && <div className="lg-auth__error">{error}</div>}
 
           {/* Sign Up Option */}
           <p className="lg-auth__signup-text">

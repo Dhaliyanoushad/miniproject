@@ -5,16 +5,13 @@ import axios from "axios";
 
 const SignUpH = () => {
   const navigate = useNavigate();
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileName, setFileName] = useState("No file chosen");
 
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
-    Department: "",
+    department: "",
     phoneNumber: "",
-    profilePicture: "",
   });
 
   // Handle input change
@@ -24,23 +21,6 @@ const SignUpH = () => {
   };
 
   // Handle file selection
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedFile(reader.result); // Store actual image data
-        setFileName(file.name);
-        setFormData({ ...formData, profilePicture: reader.result }); // Update profilePicture in formData
-      };
-      reader.readAsDataURL(file); // Convert file to Data URL
-    } else {
-      setSelectedFile(null);
-      setFileName("No file chosen");
-      setFormData({ ...formData, profilePicture: "" }); // Clear profilePicture in formData
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission
@@ -52,6 +32,8 @@ const SignUpH = () => {
       alert(response.data.msg);
       navigate("/loginhost");
     } catch (err) {
+      console.log(err);
+
       alert(err.response?.data?.msg || "Something went wrong");
     }
   };
@@ -99,9 +81,9 @@ const SignUpH = () => {
           <input
             className="sh-auth__input"
             type="text"
-            name="Department" // Added name attribute
-            placeholder="Department"
-            value={formData.Department} // Added value attribute
+            name="department" // Added name attribute
+            placeholder="department"
+            value={formData.department} // Added value attribute
             onChange={handleInputChange} // Added onChange handler
           />
 
@@ -114,31 +96,6 @@ const SignUpH = () => {
             value={formData.phoneNumber} // Added value attribute
             onChange={handleInputChange} // Added onChange handler
           />
-
-          {/* Upload Photo */}
-          <div className="sh-auth__form-group">
-            <label className="sh-auth__label">Upload Photo</label>
-            <div className="sh-auth__file-upload">
-              <input
-                type="file"
-                accept="image/*"
-                className="sh-auth__file-input"
-                id="fileInput"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="fileInput" className="sh-auth__file-label">
-                Choose File
-              </label>
-              <span className="sh-auth__file-name">{fileName}</span>
-            </div>
-            {selectedFile && (
-              <img
-                src={selectedFile}
-                alt="Preview"
-                className="sh-auth__image-preview"
-              />
-            )}
-          </div>
 
           {/* Terms and Conditions */}
           <div className="sh-auth__checkbox">
