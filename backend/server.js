@@ -36,7 +36,7 @@ connectDB();
 
 app.use("/users", userRoutes);
 app.use("/hosts", hostRoutes);
-app.use("/admin", adminRoutes);
+app.use("/admins", adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -1,16 +1,40 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LockIcon, UserIcon } from "lucide-react";
+import axios from "axios";
 
 const SuperAdminLogin = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState(""); // Added email state
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Placeholder for login logic
-    console.log("Login attempt:", username);
+    if (!email || !password) {
+      setError("Please enter both Email and Password.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/admins/login",
+        { email, password },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        navigate("/admindashboard");
+      } else {
+        setError("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      setError(
+        error.response?.data?.msg ||
+          "Login failed. Please check your credentials and try again."
+      );
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -55,9 +79,9 @@ const SuperAdminLogin = () => {
               />
               <input
                 type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 px-3 py-3 bg-[#1a1a1d] border border-[#5c4b73]/50 text-[#d2cce7] 
                            rounded-xl text-sm focus:outline-none focus:border-[#866a9a] 
                            focus:ring-2 focus:ring-[#866a9a]/50 transition duration-300"
@@ -98,10 +122,11 @@ const SuperAdminLogin = () => {
               </a>
             </div>
 
+            {error && <div className="lg-auth__error">{error}</div>}
+
             {/* Login Button */}
             <button
               type="submit"
-              onClick={() => navigate("/superadmindashboard")}
               className="w-full py-3 mt-6 bg-[#5c4b73] text-white rounded-xl 
                          hover:bg-[#866a9a] transition duration-300 text-base 
                          transform hover:-translate-y-1 hover:shadow-xl"

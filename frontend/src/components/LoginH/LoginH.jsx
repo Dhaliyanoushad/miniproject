@@ -78,11 +78,12 @@ const LoginH = () => {
             </a>
           </div>
 
+          {error && <div className="lg-auth__error">{error}</div>}
+
           {/* Login Button */}
           <button type="submit" className="lh-auth__btn lh-auth__btn--primary">
             Log In
           </button>
-          {error && <div className="lg-auth__error">{error}</div>}
 
           {/* Sign Up Option */}
           <p className="lh-auth__signup-text">

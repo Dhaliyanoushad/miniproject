@@ -77,12 +77,12 @@ const LoginG = () => {
             </a>
           </div>
 
+          {error && <div className="lg-auth__error">{error}</div>}
+
           {/* Login Button */}
           <button type="submit" className="lg-auth__btn lg-auth__btn--primary">
             Log In
           </button>
-
-          {error && <div className="lg-auth__error">{error}</div>}
 
           {/* Sign Up Option */}
           <p className="lg-auth__signup-text">

@@ -4,9 +4,10 @@ const mongoose = require("mongoose");
 const AdminSchema = new mongoose.Schema(
   {
     // Basic information
-    fullName: {
+    userName: {
       type: String,
       required: true,
+      unique: true,
       trim: true,
     },
     // Contact information
