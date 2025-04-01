@@ -85,18 +85,3 @@ exports.currentHost = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
-
-exports.verifyHost = async (req, res) => {
-  const { hostId } = req.params;
-  try {
-    const host = await Host.findById(hostId);
-    if (!host) {
-      return res.status(404).json({ msg: "Host not found" });
-    }
-    host.isVerified = true;
-    await host.save();
-    return res.status(200).json({ msg: "Host verified successfully" });
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
-  }
-};

@@ -1,4 +1,5 @@
 const Admin = require("../models/adminModel"); // Importing the Admin model
+const Host = require("../models/hostModel");
 
 exports.getAllAdmins = async (req, res) => {
   try {
@@ -22,7 +23,7 @@ exports.adminLogin = async (req, res) => {
     if (existingAdmin.password !== password) {
       return res.status(400).json({ msg: "Invalid password" });
     }
-    return res.status(200).json({ msg: `Login successful` });
+    return res.status(200).json({ success: true, msg: `Login successful` });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -35,7 +36,7 @@ exports.verifyHost = async (req, res) => {
     if (!host) {
       return res.status(404).json({ msg: "Host not found" });
     }
-    host.verified = true;
+    host.isVerified = true;
     await host.save();
     return res.status(200).json({ msg: "Host verified successfully" });
   } catch (err) {

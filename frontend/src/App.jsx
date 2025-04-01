@@ -18,7 +18,7 @@ import HostDashboard from "./pages/HostDashboard";
 import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import GuestDashboard from "./pages/GuestDashboard";
-import SuperAdminDashboard from "./pages/SuperAdmin";
+import SuperAdminLogin from "./pages/SuperAdmin";
 import Test from "./pages/Test";
 
 // Preloader Component
@@ -89,7 +89,7 @@ const AppContent = () => {
             <Route path="/test" element={<Test />} />
             <Route
               path={`/${import.meta.env.VITE_SUPER_ADMIN}`}
-              element={<SuperAdminDashboard />}
+              element={<SuperAdminLogin />}
             />
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
