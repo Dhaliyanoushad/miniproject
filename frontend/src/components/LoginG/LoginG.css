@@ -10,6 +10,18 @@
 .lg-auth > * {
   margin-top: 100px;
 }
+
+.lg-auth__error {
+  color: #ff4d4d; /* Red color for errors */
+  background-color: #ffe6e6; /* Light red background */
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  border: 1px solid #ff4d4d;
+}
 /* Left Side */
 .lg-auth__left {
   flex: 1;

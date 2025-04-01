@@ -1,16 +1,40 @@
 import React, { useState } from "react";
 import "./LoginH.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const LoginH = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Logging in with:", email, password);
+    if (!email || !password) {
+      setError("Please enter both Email and Password.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/hosts/login",
+        { email, password },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        navigate("/hostdashboard");
+      } else {
+        setError("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      setError(
+        error.response?.data?.msg ||
+          "Login failed. Please check your credentials and try again."
+      );
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -55,13 +79,10 @@ const LoginH = () => {
           </div>
 
           {/* Login Button */}
-          <button
-            type="submit"
-            className="lh-auth__btn lh-auth__btn--primary"
-            onClick={() => navigate("/hostdashboard")}
-          >
+          <button type="submit" className="lh-auth__btn lh-auth__btn--primary">
             Log In
           </button>
+          {error && <div className="lg-auth__error">{error}</div>}
 
           {/* Sign Up Option */}
           <p className="lh-auth__signup-text">

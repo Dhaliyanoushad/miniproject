@@ -1,101 +1,85 @@
 import React, { useState } from "react";
 import "./SignUpG.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const SignUpG = () => {
   const navigate = useNavigate();
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileName, setFileName] = useState("No file chosen");
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    collageName: "",
+    studentIdNumber: "",
+  });
 
-  // Handle file selection
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedFile(reader.result); // Store actual image data
-        setFileName(file.name);
-      };
-      reader.readAsDataURL(file); // Convert file to Data URL
-    } else {
-      setSelectedFile(null);
-      setFileName("No file chosen");
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/users/signup",
+        formData
+      );
+      alert(response.data.msg);
+      navigate("/loginguest");
+    } catch (err) {
+      alert(err.response?.data?.msg || "Something went wrong");
     }
   };
+
   return (
     <div className="sg-auth">
-      {/* Left Side: Blurry Background */}
-      <div className="sg-auth__left">
-        {/* <p className="sg-auth__title">Sign Up as Guest</p>
-        <p className="sg-auth__free">FOR FREE</p> */}
-      </div>
-
-      {/* Right Side: Sign Up Form */}
+      <div className="sg-auth__left"></div>
       <div className="sg-auth__right">
         <h2 className="sg-auth__heading">Create Guest Account</h2>
-        <form className="sg-auth__form">
-          {/* Full Name */}
+        <form className="sg-auth__form" onSubmit={handleSubmit}>
           <input
             className="sg-auth__input"
             type="text"
+            name="fullName"
             placeholder="Full Name"
+            value={formData.fullName}
+            onChange={handleChange}
           />
-
-          {/* Email */}
           <input
             className="sg-auth__input"
             type="email"
+            name="email"
             placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
           />
-
-          {/* Password */}
           <input
             className="sg-auth__input"
             type="password"
+            name="password"
             placeholder="Create password"
+            value={formData.password}
+            onChange={handleChange}
           />
-
-          {/* College Name */}
           <input
             className="sg-auth__input"
             type="text"
+            name="collageName"
             placeholder="College Name"
+            value={formData.collageName}
+            onChange={handleChange}
           />
-
-          {/* Student ID Number */}
           <input
             className="sg-auth__input"
             type="text"
+            name="studentIdNumber"
             placeholder="Student ID Number"
+            value={formData.studentIdNumber}
+            onChange={handleChange}
           />
-
-          {/* Upload Student ID Photo */}
-          <div className="sg-auth__form-group">
-            <label className="sg-auth__label">Upload Student ID</label>
-            <div className="sg-auth__file-upload">
-              <input
-                type="file"
-                accept="image/*"
-                className="sg-auth__file-input"
-                id="fileInput"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="fileInput" className="sg-auth__file-label">
-                Choose File
-              </label>
-              <span className="sg-auth__file-name">{fileName}</span>
-            </div>
-            {selectedFile && (
-              <img
-                src={selectedFile}
-                alt="Preview"
-                className="sg-auth__image-preview"
-              />
-            )}
-          </div>
-
-          {/* Terms and Conditions */}
           <div className="sg-auth__checkbox">
             <input
               type="checkbox"
@@ -107,16 +91,9 @@ const SignUpG = () => {
               <a href="#">Privacy Policy</a>
             </label>
           </div>
-
-          {/* Sign Up Button */}
-          <button
-            className="sg-auth__btn sg-auth__btn--primary"
-            onClick={() => navigate("/guestdashboard")}
-          >
+          <button className="sg-auth__btn sg-auth__btn--primary" type="submit">
             Create Account
           </button>
-
-          {/* Login Option */}
           <p className="sg-auth__login-text">
             Already have an account?{" "}
             <a onClick={() => navigate("/loginguest")}>Log in</a>
