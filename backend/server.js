@@ -50,10 +50,10 @@ app.get("/hosts", (req, res) => {
 
 // POST route for signup
 app.post("/users/signuphost", async (req, res) => {
-  const { fullName, email, password, occupation, phoneNumber } = req.body; // Correcting to match the database schema
+  const { fullName, email, password, department, phoneNumber } = req.body; // Correcting to match the database schema
 
   // Validate incoming data (basic validation)
-  if (!fullName || !email || !password || !occupation || !phoneNumber) {
+  if (!fullName || !email || !password || !department || !phoneNumber) {
     return res.status(400).json({ msg: "Please provide all fields." });
   }
 
@@ -62,11 +62,11 @@ app.post("/users/signuphost", async (req, res) => {
     // const hashedPassword = await bcrypt.hash(password, 10);
 
     // SQL query to insert the new host into the database
-    const sql = `INSERT INTO hosts (fullname, email, password, occupation, phone_number) VALUES (?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO hosts (fullname, email, password, department, phone_number) VALUES (?, ?, ?, ?, ?)`;
 
     db.query(
       sql,
-      [fullName, email, password, occupation, phoneNumber], // Ensure that the names match the database schema
+      [fullName, email, password, department, phoneNumber], // Ensure that the names match the database schema
       (err, result) => {
         if (err) {
           console.log(err);
