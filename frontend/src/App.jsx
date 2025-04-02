@@ -20,6 +20,7 @@ import EditEvent from "./pages/EditEvent";
 import GuestDashboard from "./pages/GuestDashboard";
 import SuperAdminDashboard from "./pages/SuperAdmin";
 import Test from "./pages/Test";
+import ProtectedRoute from "./components/protected";
 
 // Preloader Component
 const Preloader = () => {
@@ -94,12 +95,12 @@ const AppContent = () => {
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
             <Route path="/event/:id" element={<EventDetails />} />
-
             {/* Host Dashboard*/}
-            <Route path="/hostdashboard" element={<HostDashboard />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/hostdashboard" element={<HostDashboard />} />
+            </Route>{" "}
             <Route path="/newevent" element={<NewEvent />} />
             <Route path="/editevent" element={<EditEvent />} />
-
             {/* Guest Dashboard */}
             <Route path="/guestdashboard" element={<GuestDashboard />} />
             {/* Register Routes */}

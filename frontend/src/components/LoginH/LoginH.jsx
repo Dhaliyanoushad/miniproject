@@ -1,16 +1,20 @@
 import React, { useState } from "react";
-import "./LoginH.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import "./LoginH.css"; // Importing the styles
 
 const LoginH = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (!email || !password) {
       setError("Please enter both Email and Password.");
       return;
@@ -18,12 +22,13 @@ const LoginH = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/hosts/login",
+        `${import.meta.env.VITE_BASE_URL}/auth/loginhost`,
         { email, password },
         { withCredentials: true }
       );
 
-      if (response.data.success) {
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
         navigate("/hostdashboard");
       } else {
         setError("Invalid credentials. Please try again.");
@@ -33,23 +38,19 @@ const LoginH = () => {
         error.response?.data?.msg ||
           "Login failed. Please check your credentials and try again."
       );
-      console.error("Login error:", error);
     }
   };
 
   return (
     <div className="lh-auth">
-      {/* Left Side: Background Image */}
-      <div className="lh-auth__left">
-        {/* <p className="lh-auth__title">Welcome Back!</p>
-        <p className="lh-auth__free">LOG IN AS HOST</p> */}
-      </div>
+      {/* Left Side: Background */}
+      <div className="lh-auth__left"></div>
 
       {/* Right Side: Login Form */}
       <div className="lh-auth__right">
         <h2 className="lh-auth__heading">Login as Host</h2>
         <form className="lh-auth__form" onSubmit={handleSubmit}>
-          {/* Email */}
+          {/* Email Input */}
           <input
             className="lh-auth__input"
             type="email"
@@ -58,14 +59,22 @@ const LoginH = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          {/* Password */}
-          <input
-            className="lh-auth__input"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          {/* Password Input with Eye Icon */}
+          <div className="relative w-full">
+            <input
+              className="lh-auth__input pr-10" // Added padding for icon spacing
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span
+              className="absolute right-3 top-3 text-gray-500 cursor-pointer hover:text-gray-700"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
           {/* Remember Me & Forgot Password */}
           <div className="lh-auth__form-group">

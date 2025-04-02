@@ -1,49 +1,73 @@
 import React, { useState } from "react";
 import "./PostEvent.css"; // Importing the styles
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const PostEvent = () => {
   const navigate = useNavigate();
   const [eventData, setEventData] = useState({
     title: "",
     description: "",
-    date: "",
-    time: "",
-    location: "",
-    limit: "",
+    event_date: "",
+    event_time: "",
+    venue: "",
+    participants_limit: "",
     category: "",
-    image: null,
+    // image: null,
   });
 
-  const [preview, setPreview] = useState(null);
+  // const [preview, setPreview] = useState(null);
 
   // Handle input change
   const handleChange = (e) => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
 
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setEventData({ ...eventData, image: file });
+  // // Handle file upload
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setEventData({ ...eventData, image: file });
 
-      // Generate preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
-      setPreview(null);
+  //     // Generate preview URL
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => setPreview(reader.result);
+  //     reader.readAsDataURL(file);
+  //   } else {
+  //     setPreview(null);
+  //   }
+  // };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    console.log("Tokdoolsen:", token);
+    console.log("Upcoming Event Data:", eventData);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/api/events`,
+        eventData,
+        {
+          headers: {
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+
+      alert(response.data.msg);
+      console.log(response.data);
+
+      if (response.data.msg === "Event created successfully") {
+        navigate("/hostdashboard"); // Redirect on success
+      }
+    } catch (err) {
+      console.log(err);
+      alert(err.response?.data?.msg || "Something went wrong");
     }
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Upcoming Event Data:", eventData);
-    navigate("/hostdashboard");
-    // Here you would typically send the data to your backend
-  };
   const handleGoBack = () => {
     navigate("/hostdashboard");
   };
@@ -77,16 +101,16 @@ const PostEvent = () => {
           <div className="event-flex">
             <input
               type="date"
-              name="date"
-              value={eventData.date}
+              name="event_date"
+              value={eventData.event_date}
               onChange={handleChange}
               className="event-input"
               required
             />
             <input
               type="time"
-              name="time"
-              value={eventData.time}
+              name="event_time"
+              value={eventData.event_time}
               onChange={handleChange}
               className="event-input"
               required
@@ -95,9 +119,9 @@ const PostEvent = () => {
           {/* Location */}
           <input
             type="text"
-            name="location"
+            name="venue"
             placeholder="Event Venue"
-            value={eventData.location}
+            value={eventData.venue}
             onChange={handleChange}
             className="event-input"
             required
@@ -105,9 +129,9 @@ const PostEvent = () => {
           {/* Limit */}
           <input
             type="number"
-            name="limit"
+            name="participants_limit"
             placeholder="Participants Limit"
-            value={eventData.limit}
+            value={eventData.participants_limit}
             onChange={handleChange}
             className="event-input"
             required

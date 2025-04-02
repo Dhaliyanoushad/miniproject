@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios"; // Make sure axios is installed
 
 const EditEvent = () => {
   const navigate = useNavigate();
@@ -7,70 +8,127 @@ const EditEvent = () => {
   const [eventData, setEventData] = useState({
     title: "",
     description: "",
-    date: "",
-    time: "",
-    location: "",
+    event_date: "", // Changed from "date" to match backend
+    event_time: "", // Changed from "time" to match backend
+    venue: "", // Changed from "location" to match backend
+    participants_limit: "", // Added to match backend
     category: "",
     image: null,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // const [preview, setPreview] = useState(null);
 
-  const [preview, setPreview] = useState(null);
+  // Get auth token from localStorage
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // Fetch event details from backend (Replace with actual API call)
+    // Fetch event details from backend
     const fetchEventDetails = async () => {
       try {
-        // Simulating API response
-        const fakeEvent = {
-          title: "Tech Conference 2025",
-          description: "A conference on emerging technologies.",
-          date: "2025-04-15",
-          time: "10:00",
-          location: "Silicon Valley Convention Center",
-          category: "Technology",
+        setLoading(true);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}//api/events/${eventId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        // Transform backend data to match component state
+        const event = response.data;
+        setEventData({
+          title: event.title,
+          description: event.description,
+          event_date: event.event_date,
+          event_time: event.event_time,
+          venue: event.venue,
+          participants_limit: event.participants_limit,
+          category: event.category,
           image: null,
-        };
-        setEventData(fakeEvent);
+        });
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching event details:", error);
+        setError("Failed to load event details");
+        setLoading(false);
       }
     };
 
-    fetchEventDetails();
-  }, [eventId]);
+    if (eventId) {
+      fetchEventDetails();
+    }
+  }, [eventId, token]);
 
   // Handle input change
   const handleChange = (e) => {
-    setEventData({ ...eventData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setEventData({ ...eventData, [name]: value });
   };
 
   // Handle file upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setEventData({ ...eventData, image: file });
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setEventData({ ...eventData, image: file });
 
-      // Generate preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
-      setPreview(null);
-    }
-  };
+  //     // Generate preview URL
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => setPreview(reader.result);
+  //     reader.readAsDataURL(file);
+  //   } else {
+  //     setPreview(null);
+  //   }
+  // };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated Event Data:", eventData);
-    navigate("/hostdashboard");
-    // Send updated event data to backend
+
+    try {
+      // Create form data object for image upload
+      const formData = new FormData();
+      formData.append("title", eventData.title);
+      formData.append("description", eventData.description);
+      formData.append("event_date", eventData.event_date);
+      formData.append("event_time", eventData.event_time);
+      formData.append("venue", eventData.venue);
+      formData.append("participants_limit", eventData.participants_limit);
+      formData.append("category", eventData.category);
+
+      if (eventData.image) {
+        formData.append("image", eventData.image);
+      }
+
+      // Send updated event data to backend
+      await axios.put(
+        `${import.meta.env.VITE_BASE_URL}//api/events/${eventId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Navigate back to host dashboard after successful update
+      navigate("/hostdashboard");
+    } catch (error) {
+      console.error("Error updating event:", error);
+      setError("Failed to update event");
+    }
   };
 
   // Handle go back
   const handleGoBack = () => {
     navigate("/hostdashboard");
   };
+
+  if (loading)
+    return <div className="event-container">Loading event details...</div>;
+  if (error) return <div className="event-container">{error}</div>;
 
   return (
     <div className="post-event hostd">
@@ -101,37 +159,37 @@ const EditEvent = () => {
           <div className="event-flex">
             <input
               type="date"
-              name="date"
-              value={eventData.date}
+              name="event_date"
+              value={eventData.event_date}
               onChange={handleChange}
               className="event-input"
               required
             />
             <input
               type="time"
-              name="time"
-              value={eventData.time}
+              name="event_time"
+              value={eventData.event_time}
               onChange={handleChange}
               className="event-input"
               required
             />
           </div>
-          {/* Location */}
+          {/* Venue */}
           <input
             type="text"
-            name="location"
+            name="venue"
             placeholder="Event Venue"
-            value={eventData.location}
+            value={eventData.venue}
             onChange={handleChange}
             className="event-input"
             required
           />
-          {/* Limit */}
+          {/* Participants Limit */}
           <input
             type="number"
-            name="limit"
+            name="participants_limit"
             placeholder="Participants Limit"
-            value={eventData.limit}
+            value={eventData.participants_limit}
             onChange={handleChange}
             className="event-input"
             required

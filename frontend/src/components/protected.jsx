@@ -1,19 +1,40 @@
-import React from "react";
-import { Redirect, Route } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { jwtDecode } from "jwt-decode"; // Corrected import
 
-const ProtectedRoute = ({ component: Component, ...rest }) => {
-  // Replace this with your actual authentication logic
-  const isAuthenticated = localStorage.getItem("token") ? true : false;
+const ProtectedRoute = () => {
+  const token = localStorage.getItem("token");
 
-  return (
-    <Route
-      {...rest}
-      render={(props) =>
-        isAuthenticated ? <Component {...props} /> : <Redirect to="/register" />
+  if (!token) {
+    console.log("No token found. Redirecting to login.");
+    return <Navigate to="/loginhost" />;
+  }
+
+  try {
+    const decoded = jwtDecode(token); // Correct usage
+    const currentTime = Date.now() / 1000; // Convert to seconds
+
+    if (decoded.exp) {
+      const remainingTime = decoded.exp - currentTime;
+
+      if (remainingTime <= 0) {
+        console.log("Token has expired. Redirecting to login.");
+        localStorage.removeItem("token"); // Remove expired token
+        return <Navigate to="/loginhost" />;
       }
-    />
-  );
+
+      console.log(
+        `Token is valid. Remaining time: ${Math.floor(
+          remainingTime / 60
+        )} minutes and ${Math.floor(remainingTime % 60)} seconds`
+      );
+    }
+
+    return <Outlet />;
+  } catch (error) {
+    console.log("Invalid token. Redirecting to login.", error);
+    localStorage.removeItem("token");
+    return <Navigate to="/loginhost" />;
+  }
 };
 
 export default ProtectedRoute;
-// This code defines a ProtectedRoute component that checks if a user is authenticated before rendering the specified component. If the user is not authenticated, they are redirected to the login page. You can use this component to wrap any route that requires authentication in your React Router setup.
