@@ -29,6 +29,7 @@ const LoginG = () => {
 
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("guest", JSON.stringify(response.data.guest));
         navigate("/guestdashboard");
       } else {
         setError("Invalid credentials. Please try again.");
@@ -48,7 +49,7 @@ const LoginG = () => {
 
       {/* Right Side: Login Form */}
       <div className="lg-auth__right">
-        <p className="lg-auth__title">Welcome Back!</p>
+        <p className="lg-auth__title">Guest Login</p>
         <p className="lg-auth__free">LOG IN TO CONTINUE</p>
         {/* <h2 className="lg-auth__heading">Login as Guest</h2> */}
         <form className="lg-auth__form" onSubmit={handleSubmit}>
@@ -84,9 +85,9 @@ const LoginG = () => {
               <input type="checkbox" className="lg-auth__checkbox-input" />
               Remember me
             </label>
-            <a href="#" className="lg-auth__forgot-password">
+            {/* <a href="#" className="lg-auth__forgot-password">
               Forgot password?
-            </a>
+            </a> */}
           </div>
 
           {/* Login Button */}

@@ -19,10 +19,9 @@ router.get("/", (req, res) => {
 
     // Fetch pending guests for each event
     const pendingGuestSql = `
-      SELECT ea.event_id,ea.id, g.guest_id, g.full_name
+      SELECT ea.event_id,ea.id, g.guest_id, g.full_name,ea.booking_status
       FROM EventApproval ea
       JOIN guests g ON ea.guest_id = g.guest_id
-      WHERE ea.booking_status = 'Pending'
     `;
 
     db.query(pendingGuestSql, (err, pendingGuests) => {
@@ -40,11 +39,33 @@ router.get("/", (req, res) => {
             id: guest.id,
             guest_id: guest.guest_id,
             name: guest.full_name,
+            booking_status: guest.booking_status,
           })),
       }));
 
       res.json(eventMap);
     });
+  });
+});
+// Get all event bookings (protected)
+router.get("/eventbookings", (req, res) => {
+  const db = req.app.locals.db;
+
+  // Join eventapproval with events to fetch event details
+  const sql = `
+    SELECT ea.*, e.*
+    FROM eventapproval ea
+    JOIN events e ON ea.event_id = e.event_id
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching event bookings:", err);
+      return res.status(500).json({ msg: "Error fetching event bookings." });
+    }
+
+    console.log("Event Bookings with Event Details:", results);
+    res.json(results);
   });
 });
 
@@ -105,6 +126,30 @@ router.post("/", verifyToken, (req, res) => {
   );
 });
 
+// Register for an event (protected)
+// This route is for guests to register for an event
+router.post("/bookticket", verifyToken, (req, res) => {
+  const db = req.app.locals.db;
+  const { guest_id, event_id } = req.body;
+
+  if (!guest_id || !event_id) {
+    return res.status(400).json({ msg: "Missing required fields" });
+  }
+
+  const sql = `
+    INSERT INTO eventapproval (guest_id, event_id) 
+    VALUES (?, ?)
+  `;
+
+  db.query(sql, [guest_id, event_id], (err, result) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ msg: "Database error" });
+    }
+    res.status(200).json({ msg: "Ticket booked successfully" });
+  });
+});
+
 // Update an event (protected)
 router.put("/:event_id", verifyToken, (req, res) => {
   const db = req.app.locals.db;
@@ -143,7 +188,7 @@ router.put("/:event_id", verifyToken, (req, res) => {
     }
 
     if (results.length === 0) {
-      return res.status(404).json({ msg: "Event not found" });
+      return res.status(404).json({ msg: "Event not found1" });
     }
 
     const event = results[0];
@@ -207,7 +252,7 @@ router.get("/:event_id", (req, res) => {
     }
 
     if (results.length === 0) {
-      return res.status(404).json({ msg: "Event not found" });
+      return res.status(404).json({ msg: "Event not found2" });
     }
 
     res.json({ event: results[0] });
@@ -237,6 +282,123 @@ router.post("/updateBookingStatus", verifyToken, (req, res) => {
     }
 
     res.json({ msg: "Booking status updated successfully" });
+  });
+});
+
+// Update guest request status (Approve/Reject)
+router.patch("/:event_id/guests/:guest_id", verifyToken, (req, res) => {
+  const db = req.app.locals.db;
+  const { event_id, guest_id } = req.params;
+  const { booking_status } = req.body; // "Approved" or "Rejected"
+
+  if (!booking_status) {
+    return res.status(400).json({ msg: "Please provide booking status." });
+    a;
+  }
+
+  // Verify that the event exists
+  const checkEventSql = "SELECT host_id FROM events WHERE event_id = ?";
+
+  db.query(checkEventSql, [event_id], (err, results) => {
+    if (err) {
+      console.error("Error checking event:", err);
+      return res.status(500).json({ msg: "Server error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ msg: "Event not found3" });
+    }
+
+    const event = results[0];
+
+    // Check if the current user is the host
+    if (event.host_id !== req.user.id) {
+      return res
+        .status(403)
+        .json({ msg: "You are not authorized to update this guest request" });
+    }
+
+    // If approved, move to guests table; if rejected, just update the status
+    if (booking_status === "Approved") {
+      const insertGuestSql =
+        "INSERT INTO guests (event_id, guest_id) VALUES (?, ?)";
+
+      db.query(insertGuestSql, [event_id, guest_id], (insertErr) => {
+        if (insertErr) {
+          console.error("Error inserting guest:", insertErr);
+          return res.status(500).json({ msg: "Error approving guest request" });
+        }
+
+        // Remove from EventApproval
+        const deleteRequestSql =
+          "DELETE FROM EventApproval WHERE event_id = ? AND guest_id = ?";
+
+        db.query(deleteRequestSql, [event_id, guest_id], (deleteErr) => {
+          if (deleteErr) {
+            console.error("Error removing guest request:", deleteErr);
+            return res.status(500).json({ msg: "Error finalizing approval" });
+          }
+          res.json({ msg: "Guest request approved successfully" });
+        });
+      });
+    } else {
+      // Just update the status if rejected
+      const updateSql =
+        "UPDATE EventApproval SET booking_status = ? WHERE event_id = ? AND guest_id = ?";
+
+      db.query(updateSql, [booking_status, event_id, guest_id], (updateErr) => {
+        if (updateErr) {
+          console.error("Error updating booking status:", updateErr);
+          return res.status(500).json({ msg: "Error rejecting guest request" });
+        }
+        res.json({ msg: "Guest request rejected successfully" });
+      });
+    }
+  });
+});
+
+router.get("/myevents/:id", verifyToken, (req, res) => {
+  const db = req.app.locals.db;
+  const guest_id = req.params.id; // Extract guest_id from the authenticated user
+
+  // Query to fetch events registered by the user
+  const sql = `
+    SELECT e.*
+    FROM eventapproval ea
+    JOIN events e ON ea.event_id = e.event_id
+    WHERE ea.guest_id = ?
+  `;
+
+  db.query(sql, [guest_id], (err, results) => {
+    if (err) {
+      console.error("Error fetching registered events:", err);
+      return res.status(500).json({ msg: "Error fetching registered events." });
+    }
+
+    res.json({ registered_events: results });
+  });
+});
+
+router.get("/eventbookings/:guestid", (req, res) => {
+  const db = req.app.locals.db;
+  const guestId = req.params.guestid; // Extract guest ID from route parameters
+
+  // Query to fetch only the events registered by the specified guest
+  const sql = `
+    SELECT ea.*, e.*
+    FROM eventapproval ea
+    JOIN events e ON ea.event_id = e.event_id
+    WHERE ea.guest_id = ?;
+  `;
+
+  db.query(sql, [guestId], (err, results) => {
+    if (err) {
+      console.error("Error fetching event bookings:", err);
+      return res.status(500).json({ msg: "Error fetching event bookings." });
+    }
+
+    console.log(`Event Bookings for Guest ID ${guestId}:`, results);
+    res.json(results);
   });
 });
 

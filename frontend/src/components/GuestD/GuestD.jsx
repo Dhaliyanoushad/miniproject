@@ -2,99 +2,85 @@ import { useEffect, useState } from "react";
 import Ticket from "./Ticket";
 import TicketBookingConfirmation from "./TicketBookingConfirmation";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const GuestD = () => {
+  const navigate = useNavigate();
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("registered");
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateFilter, setDateFilter] = useState({
-    type: "none", // "none", "before", "after", "between"
-    date1: "",
-    date2: "",
-  });
-  const [guestProfile, setGuestProfile] = useState({
-    name: "Alex Morgan",
-    joinDate: "March 2024",
-    image:
-      "https://i.pinimg.com/736x/16/e1/cb/16e1cb84a53ee8cb0e7d8fe72533568e.jpg",
-  });
+  const [guestProfile, setGuestProfile] = useState({});
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [bookingEvent, setBookingEvent] = useState(null);
 
   useEffect(() => {
-    const dummyRegisteredEvents = [
-      {
-        id: 1,
-        name: "Tech Innovation Summit",
-        date: "April 15, 2025",
-        location: "Main Auditorium",
-        status: "Confirmed",
-      },
-      {
-        id: 2,
-        name: "AI & Robotics Workshop",
-        date: "May 5, 2025",
-        location: "Lab 3, Tech Block",
-        status: "Pending",
-      },
-    ];
+    const token = localStorage.getItem("token");
+    const guest = JSON.parse(localStorage.getItem("guest"));
 
-    const dummyUpcomingEvents = [
-      {
-        id: 3,
-        name: "Startup Pitch Fest",
-        type: "Startup",
-        date: "June 20, 2025",
-        location: "Convention Center",
-        spots: "Limited spots",
-        price: "$149",
-      },
-      {
-        id: 4,
-        name: "Blockchain Summit",
-        type: "Technology",
-        date: "July 10, 2025",
-        location: "Conference Hall B",
-        spots: "Filling fast",
-        price: "$199",
-      },
-      {
-        id: 5,
-        name: "AI Ethics Conference",
-        type: "AI",
-        date: "August 18, 2025",
-        location: "Hall A",
-        spots: "Available",
-        price: "$129",
-      },
-    ];
-
-    setRegisteredEvents(dummyRegisteredEvents);
-    setUpcomingEvents(dummyUpcomingEvents);
-  }, []);
-
-  const filterEventsByDate = (events) => {
-    if (dateFilter.type === "none") return events;
-
-    return events.filter((event) => {
-      const eventDate = new Date(event.date);
-
-      switch (dateFilter.type) {
-        case "before":
-          return eventDate < new Date(dateFilter.date1);
-        case "after":
-          return eventDate > new Date(dateFilter.date1);
-        case "between":
-          return (
-            eventDate > new Date(dateFilter.date1) &&
-            eventDate < new Date(dateFilter.date2)
-          );
-        default:
-          return true;
-      }
+    setGuestProfile({
+      ...guest,
+      joined: `${new Date(guest.joined).toLocaleString("en-US", {
+        month: "long",
+      })} ${new Date(guest.joined).getFullYear()}`,
     });
-  };
+
+    if (!token) {
+      navigate("/loginguest");
+      return;
+    }
+
+    // Set dummy data immediately
+    const fetchRegisteredEvents = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/api/events/eventbookings/${
+            guest.id
+          }`,
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }
+        );
+        console.log("dools", response.data);
+
+        if (response.data && response.data) {
+          // Transform API data to match your UI structure
+          // Assuming the API returns an array of registered events
+
+          setRegisteredEvents(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching registered events:", error);
+      }
+    };
+
+    const fetchUpcomingEvents = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/api/events`,
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }
+        );
+
+        if (response.data && Array.isArray(response.data)) {
+          // Format API response
+
+          setUpcomingEvents(response.data);
+          console.log("upcomingEvents", upcomingEvents);
+        }
+      } catch (error) {
+        console.error("Error fetching upcoming events:", error);
+      }
+    };
+
+    fetchRegisteredEvents();
+    fetchUpcomingEvents();
+  }, [navigate]); // Removed upcomingEvents from dependencies
 
   const handleViewTicket = (eventId) => {
     const event = registeredEvents.find((event) => event.id === eventId);
@@ -113,10 +99,34 @@ const GuestD = () => {
     );
   };
 
-  const handleBookTicket = (eventId) => {
-    const event = upcomingEvents.find((event) => event.id === eventId);
-    if (event) {
-      setBookingEvent(event);
+  const handleBookTicket = async (eventId) => {
+    const event = upcomingEvents.find((event) => event.event_id === eventId);
+    if (!event) return;
+
+    const confirmBooking = window.confirm(
+      `Do you want to book a ticket for ${event.title}?`
+    );
+    if (!confirmBooking) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/api/events/bookticket`,
+        { guest_id: guestProfile.id, event_id: eventId },
+        {
+          headers: { Authorization: "Bearer " + token },
+        }
+      );
+
+      if (response.status === 200) {
+        alert(`Ticket booked for ${event.title}!`); // Changed from event.name to event.title
+        handleConfirmBooking(event);
+      } else {
+        alert("Failed to book ticket. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error booking ticket:", error);
+      alert("An error occurred while booking. Please try again.");
     }
   };
 
@@ -128,21 +138,17 @@ const GuestD = () => {
     const newRegisteredEvent = {
       ...confirmedEvent,
       id:
-        Math.max(...[...registeredEvents, ...upcomingEvents].map((e) => e.id)) +
-        1,
+        Math.max(
+          ...[...registeredEvents, ...upcomingEvents].map((e) => e.id),
+          0
+        ) + 1,
+      status: "Confirmed",
     };
 
     setRegisteredEvents((prev) => [...prev, newRegisteredEvent]);
     console.log(`Successfully booked ticket for ${confirmedEvent.name}`);
     setActiveTab("registered");
   };
-
-  const navigate = useNavigate();
-  const filteredUpcomingEvents = upcomingEvents
-    .filter((event) =>
-      event.type.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .filter(filterEventsByDate);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -166,7 +172,10 @@ const GuestD = () => {
             Welcome, {guestProfile.name}
           </h2>
           <p className="text-gray-300 text-xs mt-1">
-            Member since {guestProfile.joinDate}
+            Member since {guestProfile.joined}
+          </p>
+          <p className="text-gray-300 text-s mt-1">
+            Student ID:{guestProfile.student_id}
           </p>
         </div>
 
@@ -254,75 +263,6 @@ const GuestD = () => {
                   </svg>
                 </div>
               </div>
-
-              {/* Date Filter Type */}
-              <div className="relative">
-                <select
-                  value={dateFilter.type}
-                  onChange={(e) =>
-                    setDateFilter({ ...dateFilter, type: e.target.value })
-                  }
-                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                    focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
-                >
-                  <option value="none" className="bg-[#261646]">
-                    All Dates
-                  </option>
-                  <option value="before" className="bg-[#261646]">
-                    Before Date
-                  </option>
-                  <option value="after" className="bg-[#261646]">
-                    After Date
-                  </option>
-                  <option value="between" className="bg-[#261646]">
-                    Between Dates
-                  </option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
-                  <svg
-                    className="w-5 h-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Date input 1 */}
-              {dateFilter.type !== "none" && (
-                <div className="relative flex-1">
-                  <input
-                    type="date"
-                    value={dateFilter.date1}
-                    onChange={(e) =>
-                      setDateFilter({ ...dateFilter, date1: e.target.value })
-                    }
-                    className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
-                  />
-                </div>
-              )}
-
-              {/* Date input 2 (only for between filter) */}
-              {dateFilter.type === "between" && (
-                <div className="relative flex-1">
-                  <input
-                    type="date"
-                    value={dateFilter.date2}
-                    onChange={(e) =>
-                      setDateFilter({ ...dateFilter, date2: e.target.value })
-                    }
-                    className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
-                  />
-                </div>
-              )}
             </div>
           )}
 
@@ -348,16 +288,18 @@ const GuestD = () => {
                   >
                     <div className="flex justify-between">
                       <h3 className="text-xl font-bold text-white">
-                        {event.name}
+                        {event.title}
                       </h3>
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          event.status === "Confirmed"
-                            ? "bg-emerald-500/80 text-white"
-                            : "bg-pink-500/60 text-white"
+                        className={`px-2 pt-2 pb-1 rounded-full text-xs font-semibold ${
+                          event.booking_status === "Pending"
+                            ? "bg-yellow-300 text-black"
+                            : event.booking_status === "Confirmed"
+                            ? "bg-green-500 text-white"
+                            : "bg-red-500 text-white"
                         }`}
                       >
-                        {event.status}
+                        {event.booking_status}
                       </span>
                     </div>
                     <div className="mt-4 space-y-2">
@@ -365,7 +307,7 @@ const GuestD = () => {
                         {event.date}
                       </p>
                       <p className="text-gray-300 flex items-center gap-2">
-                        {event.location}
+                        {event.venue}
                       </p>
                     </div>
                     <div className="mt-6 flex gap-3">
@@ -386,7 +328,7 @@ const GuestD = () => {
                 ))}
               </div>
             )
-          ) : filteredUpcomingEvents.length === 0 ? (
+          ) : upcomingEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <p className="text-xl text-gray-400">No matching events found.</p>
               <p className="text-gray-300 mt-2">
@@ -395,40 +337,62 @@ const GuestD = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredUpcomingEvents.map((event) => (
+              {upcomingEvents.map((event) => (
                 <div
-                  key={event.id}
+                  key={event.event_id}
                   className="group relative p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-white/5 transform scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-500"></div>
+                  {/* <div className="absolute inset-0 bg-white/5 transform scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-500"></div> */}
 
                   <div className="relative">
                     <div className="flex justify-between items-start">
                       <div>
                         <span className="inline-block px-2 py-1 bg-[#866A9A]/40 text-white text-xs rounded-full mb-2">
-                          {event.type}
+                          {event.category}
                         </span>
                         <h3 className="text-xl font-bold text-white">
-                          {event.name}
+                          {event.title}
                         </h3>
                       </div>
                     </div>
 
                     <div className="mt-4 space-y-2">
-                      <p className="text-gray-300">{event.date}</p>
-                      <p className="text-gray-300">{event.location}</p>
+                      <p className="text-gray-300">
+                        {new Date(event.event_date).toLocaleDateString(
+                          "en-US",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )}
+                      </p>
+                      <p className="text-gray-300">{event.venue}</p>
                       <p className="text-gray-300">
                         <span className="text-pink-200 text-sm">
-                          {event.spots}
+                          {event.participants_limit} seats available
                         </span>
                       </p>
                     </div>
 
                     <button
-                      onClick={() => handleBookTicket(event.id)}
-                      className="mt-6 w-full bg-gradient-to-r from-[#563440] to-[#7A3B69] py-3 px-4 text-white rounded-lg font-medium hover:shadow-lg transition"
+                      onClick={() => handleBookTicket(event.event_id)}
+                      disabled={registeredEvents.some(
+                        (regEvent) => regEvent.event_id === event.event_id
+                      )}
+                      className={`mt-6 w-full py-3 px-4 rounded-lg font-medium transition ${
+                        registeredEvents.some(
+                          (regEvent) => regEvent.event_id === event.event_id
+                        )
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : "bg-gradient-to-r from-[#563440] to-[#7A3B69] text-white hover:shadow-lg"
+                      }`}
                     >
-                      Reserve Your Spot
+                      {registeredEvents.some(
+                        (regEvent) => regEvent.event_id === event.event_id
+                      )
+                        ? "Already Booked"
+                        : "Reserve Your Spot"}
                     </button>
                   </div>
                 </div>

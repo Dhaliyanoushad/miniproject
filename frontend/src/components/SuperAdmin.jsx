@@ -90,12 +90,12 @@ const SuperAdminLogin = () => {
                 />
                 <span className="select-none">Remember me</span>
               </label>
-              <a
+              {/* <a
                 href="#"
                 className="text-[#9a879d] hover:text-[#b8a0c9] transition duration-300"
               >
                 Forgot password?
-              </a>
+              </a> */}
             </div>
 
             {/* Login Button */}

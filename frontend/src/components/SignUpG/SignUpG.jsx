@@ -40,7 +40,11 @@ const SignUpG = () => {
         formData
       );
       alert(response.data.msg);
+      localStorage.setItem("guest", JSON.stringify(response.data.guest));
+      localStorage.setItem("token", response.data.token);
       navigate("/guestdashboard");
+
+      console.log(localStorage.getItem("user"));
     } catch (err) {
       console.log(err);
       alert(err.response?.data?.msg || "Something went wrong");

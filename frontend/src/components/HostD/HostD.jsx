@@ -15,148 +15,148 @@ const HostD = () => {
   const [events, setEvents] = useState([]);
   const [expandedEventId, setExpandedEventId] = useState(null);
   const [showRequestsForEvent, setShowRequestsForEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem("token");
+    const storedHost = localStorage.getItem("host");
+    console.log("Token:", token);
+    console.log("Stored Host:", JSON.parse(storedHost));
+
     if (!token) {
       navigate("/loginhost");
       return;
     }
 
-    // Fetch host data and events
-    const fetchHostData = async () => {
+    if (storedHost) {
+      const host = JSON.parse(storedHost);
+      setHostData(host);
+      console.log("Host Data:", host);
+    }
+    const getHostEvents = async () => {
       try {
-        setLoading(true);
-        const baseUrl =
-          import.meta.env.VITE_BASE_URL || "http://localhost:8000";
+        // Fetch all events
+        const response = await axios.get("http://localhost:8000/api/events");
 
-        // Get user ID from token
-        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-        const hostId = tokenPayload.id;
-
-        // Fetch host details
-        const hostResponse = await fetch(`${baseUrl}/api/hosts/${hostId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!hostResponse.ok) {
-          throw new Error("Failed to fetch host data");
-        }
-
-        const hostData = await hostResponse.json();
-
-        // Calculate joined date (format the host_id creation date or use current date for demo)
-        const joinedDate = new Date().toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-        });
-
-        setHostData({
-          ...hostData,
-          joinedDate,
-          // Default profile image if none exists
-          image:
-            "https://i.pinimg.com/736x/d6/f8/7c/d6f87ca07ddc580a72ab4314ff238cba.jpg",
-        });
-
-        // Fetch host's events
-        const eventsResponse = await fetch(`${baseUrl}/api/events`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!eventsResponse.ok) {
+        if (response.status !== 200) {
           throw new Error("Failed to fetch events");
         }
+        const allEvents = response.data;
+        // Filter events hosted by this host
+        const filteredEvents = allEvents.filter(
+          (event) => event.host_id === hostData.host_id
+        );
 
-        const eventsData = await eventsResponse.json();
+        // Optionally, update your state if needed
+        setEvents(filteredEvents);
+        // console.log("Filtered Events:", events);
 
-        // Filter events for this host and format them
-        const hostEvents = eventsData
-          .filter((event) => event.host_id === hostId)
-          .map((event) => ({
-            id: event.event_id,
-            event_id: event.event_id, // Keep original ID for API calls
-            name: event.title,
-            title: event.title,
-            description: event.description,
-            date: event.event_date
-              ? new Date(event.event_date).toLocaleDateString()
-              : "",
-            time: event.event_time,
-            venue: event.venue,
-            category: event.category,
-            limit: event.participants_limit,
-            // Extract pending guests from the API response
-            guests: [], // Will be populated with approved guests if available
-            guestRequests: event.pending_guests
-              ? event.pending_guests.map((guest) => guest.name)
-              : [], // Extract names from pending guests
-          }));
+        // Map required details for each event:
+        // Only include pending guests (if booking_status is "Pending")
+        // const hostEventsMapped = filteredEvents.map((event) => {
+        //   const pendingGuests = event.pending_guests.filter(
+        //     (guest) => guest.booking_status === "Pending"
+        //   );
+        //   return {
+        //     event_id: event.event_id,
+        //     title: event.title,
+        //     pending_guest_count: pendingGuests.length,
+        //     pending_guest_names: pendingGuests.map((guest) => guest.name),
+        //   };
+        // });
 
-        // For each event, try to fetch guest registrations if not included in the main API response
-        for (const event of hostEvents) {
-          if (event.guestRequests.length === 0 && event.event_id) {
-            try {
-              // Try to fetch pending guests if not included in the main API response
-              const guestsResponse = await fetch(
-                `${baseUrl}/api/events/${event.event_id}/guests`,
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                }
-              );
-
-              if (guestsResponse.ok) {
-                const guestsData = await guestsResponse.json();
-
-                if (guestsData.pending_guests) {
-                  event.guestRequests = guestsData.pending_guests.map(
-                    (guest) => guest.name
-                  );
-                }
-
-                if (guestsData.approved_guests) {
-                  event.guests = guestsData.approved_guests.map(
-                    (guest) => guest.name
-                  );
-                }
-              }
-            } catch (error) {
-              console.error(
-                `Error fetching guests for event ${event.id}:`,
-                error
-              );
-            }
-          }
-        }
-
-        setEvents(hostEvents);
+        // return hostEventsMapped;
       } catch (error) {
-        console.error("Error fetching data:", error);
-        // If token is invalid, redirect to login
-        if (error.message.includes("token")) {
-          localStorage.removeItem("token");
-          navigate("/loginhost");
-        }
-      } finally {
-        setLoading(false);
+        console.error("Error fetching host events:", error);
+        return [];
       }
     };
 
-    fetchHostData();
-  }, [navigate]);
+    // Call the function to fetch host events
+
+    // Example usage inside a React component
+
+    getHostEvents();
+
+    // const fetchHostData = async () => {
+    //   try {
+    //     const response = await axios.get(
+    //       `${import.meta.env.VITE_BASE_URL}/api/events`,
+    //       {
+    //         headers: {
+    //           Authorization: `Bearer ${token}`,
+    //         },
+    //       }
+    //     );
+
+    //     if (!response.data) {
+    //       throw new Error("No data returned from API");
+    //     }
+
+    //     setRegisteredEvents(response.data);
+
+    //     const hostEvents = response.data.map((event) => ({
+    //       ...event,
+    //       guestRequests: [],
+    //       guests: [],
+    //     }));
+
+    //     for (const event of hostEvents) {
+    //       try {
+    //         const guestsResponse = await axios.get(
+    //           `${import.meta.env.VITE_BASE_URL}/api/events/${
+    //             event.event_id
+    //           }/guests`,
+    //           {
+    //             headers: {
+    //               Authorization: `Bearer ${token}`,
+    //             },
+    //           }
+    //         );
+
+    //         if (guestsResponse.data) {
+    //           event.guestRequests =
+    //             guestsResponse.data.pending_guests?.map((g) => g.name) || [];
+    //           event.guests =
+    //             guestsResponse.data.approved_guests?.map((g) => g.name) || [];
+    //         }
+    //       } catch (error) {
+    //         console.error(
+    //           `Error fetching guests for event ${event.event_id}:`,
+    //           error
+    //         );
+    //       }
+    //     }
+
+    //     setEvents(hostEvents);
+    //   } catch (error) {
+    //     console.error("Error fetching data:", error);
+
+    //     if (error.message.includes("token")) {
+    //       localStorage.removeItem("token");
+    //       navigate("/loginhost");
+    //     }
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+
+    // fetchHostData();
+  }, [navigate]); // Removed the misplaced closing brace and fixed the dependency array
+
+  const fetchEvents = async () => {
+    console.log("Fetching events...", events);
+  };
+
+  // Call the function to fetch events
+  fetchEvents();
 
   const handleCreateEvent = () => {
-    navigate("/post-event"); // Updated to match your route
+    navigate("/newevent"); // Updated to match your route
   };
 
   const handleEditEvent = (id) => {
-    navigate(`/edit-event/${id}`); // Updated to match your route
+    navigate(`/editevent/${id}`); // Updated to match your route
   };
 
   const handleDeleteEvent = async (eventId) => {
@@ -212,44 +212,60 @@ const HostD = () => {
       const token = localStorage.getItem("token");
       const baseUrl = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
 
-      // Find the guest request ID based on the name
-      const event = events.find((e) => e.id === eventId);
-      if (!event) return;
-
-      // API call to handle guest request approval/rejection
-      // Implement the actual endpoint once available
-      await fetch(`${baseUrl}/api/events/${eventId}/guests/${guestName}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          status: action === "accept" ? "approved" : "rejected",
-        }),
+      console.log("Request params:", {
+        eventId,
+        guestName,
+        action,
+        booking_status: action === "accept" ? "Approved" : "Rejected",
       });
 
-      // Update local state
-      setEvents((prevEvents) => {
-        return prevEvents.map((event) => {
-          if (event.id === eventId) {
-            const updatedEvent = { ...event };
-            updatedEvent.guestRequests = event.guestRequests.filter(
-              (request) => request !== guestName
-            );
+      // Make the API call with the correct parameters
+      const response = await axios.patch(
+        `${baseUrl}/api/events/${eventId}/guests/${guestName}`,
+        { booking_status: action === "accept" ? "Approved" : "Rejected" },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-            if (action === "accept") {
-              updatedEvent.guests = [...event.guests, guestName];
-            }
+      console.log("Response:", response.data);
 
-            return updatedEvent;
-          }
-          return event;
-        });
-      });
+      // Update local state only after successful API call
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? {
+                ...event,
+                guestRequests: event.guestRequests.filter(
+                  (request) => request !== guestName
+                ),
+                guests:
+                  action === "accept"
+                    ? [...event.guests, guestName]
+                    : event.guests,
+              }
+            : event
+        )
+      );
+
+      alert(
+        action === "accept"
+          ? "Guest approved successfully"
+          : "Guest rejected successfully"
+      );
     } catch (error) {
       console.error("Error updating guest status:", error);
-      alert("Failed to update guest status");
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+        alert(
+          `Failed to update guest status: ${
+            error.response.data.msg || error.message
+          }`
+        );
+      } else {
+        alert(`Failed to update guest status: ${error.message}`);
+      }
     }
   };
 

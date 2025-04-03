@@ -67,21 +67,6 @@ const TicketBookingConfirmation = ({ event, onClose, onConfirm }) => {
         <div className="space-y-4 mb-6">
           <div>
             <label className="block text-gray-300 text-sm font-medium mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={attendeeInfo.email}
-              onChange={handleInputChange}
-              placeholder="your@email.com"
-              className="w-full px-4 py-2 rounded-lg bg-white/5 border border-purple-500/20 text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500/40"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-300 text-sm font-medium mb-2">
               Phone Number
             </label>
             <input

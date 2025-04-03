@@ -29,6 +29,7 @@ const LoginH = () => {
 
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("host", JSON.stringify(response.data.host));
         navigate("/hostdashboard");
       } else {
         setError("Invalid credentials. Please try again.");
@@ -48,7 +49,7 @@ const LoginH = () => {
 
       {/* Right Side: Login Form */}
       <div className="lh-auth__right">
-        <h2 className="lh-auth__heading">Login as Host</h2>
+        <h2 className="lh-auth__heading">Login Host</h2>
         <form className="lh-auth__form" onSubmit={handleSubmit}>
           {/* Email Input */}
           <input
@@ -82,9 +83,9 @@ const LoginH = () => {
               <input type="checkbox" className="lh-auth__checkbox-input" />
               Remember me
             </label>
-            <a href="#" className="lh-auth__forgot-password">
+            {/* <a href="#" className="lh-auth__forgot-password">
               Forgot password?
-            </a>
+            </a> */}
           </div>
 
           {/* Login Button */}

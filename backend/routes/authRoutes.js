@@ -8,11 +8,25 @@ const SECRET_KEY = "your_secret_key";
 
 // POST route for host signup
 router.post("/signuphost", async (req, res) => {
-  const { fullName, email, password, department, phoneNumber } = req.body;
+  const { fullname, email, password, department, phone_number } = req.body;
+
   const db = req.app.locals.db;
 
-  if (!fullName || !email || !password || !department || !phoneNumber) {
-    return res.status(400).json({ msg: "Please provide all fields." });
+  // if (!fullname || !email || !password || !department || !phone_number) {
+  //   return res.status(400).json({ msg: "Please provide all fields." });
+  // }
+  if (!fullname || !email || !password || !department || !phone_number) {
+    const missingFields = [];
+    if (!fullname) missingFields.push("fullname");
+    if (!email) missingFields.push("email");
+    if (!password) missingFields.push("password");
+    if (!department) missingFields.push("department");
+    if (!phone_number) missingFields.push("phone_number");
+
+    return res.status(400).json({
+      msg: "Missing required fields",
+      missingFields: missingFields,
+    });
   }
 
   if (password.length < 6) {
@@ -41,7 +55,7 @@ router.post("/signuphost", async (req, res) => {
 
       db.query(
         sql,
-        [fullName, email, hashedPassword, department, phoneNumber],
+        [fullname, email, hashedPassword, department, phone_number],
         (err, result) => {
           if (err) {
             console.log("Database Insert Error:", err);
@@ -56,8 +70,23 @@ router.post("/signuphost", async (req, res) => {
             SECRET_KEY,
             { expiresIn: "1h" }
           );
+          const host = {
+            id: result.insertId,
+            name: fullname,
+            email: email,
+            department: department,
+            phone_number: phone_number,
+            joined: new Date(),
+          };
 
-          return res.status(201).json({ msg: "Signup successful", token });
+          // localStorage.setItem("host", JSON.stringify(host));
+          // localStorage.setItem("token", token);
+
+          return res.status(201).json({
+            msg: "Signup successful",
+            token,
+            host: host,
+          });
         }
       );
     });
@@ -118,7 +147,20 @@ router.post("/signupguest", async (req, res) => {
             { expiresIn: "1h" }
           );
 
-          return res.status(201).json({ msg: "Signup successful", token });
+          const guest = {
+            id: result.insertId,
+            name: full_name,
+            email: email,
+            college_name: college_name,
+            student_id: student_id,
+            joined: new Date(),
+          };
+
+          return res.status(201).json({
+            msg: "Signup successful",
+            token,
+            guest: guest,
+          });
         }
       );
     });
@@ -161,7 +203,7 @@ router.post("/loginhost", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ msg: "Login successful", token });
+    res.status(200).json({ msg: "Login successful", token, host: user });
   });
 });
 
@@ -198,7 +240,11 @@ router.post("/loginguest", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ msg: "Login successful", token });
+    res.status(200).json({
+      msg: "Login successful",
+      token,
+      guest: user,
+    });
   });
 });
 

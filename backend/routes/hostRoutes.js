@@ -16,6 +16,31 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/events", (req, res) => {
+  const db = req.app.locals.db;
+
+  // Query to get event details, host ID, and count of registered guests per event
+  const sql = `
+    SELECT e.event_id, e.title, e.description, e.event_date, e.event_time, e.venue, 
+           e.participants_limit, e.category, e.image_url, e.host_id,
+           COUNT(ea.guest_id) AS total_guests
+    FROM events e
+    LEFT JOIN eventapproval ea ON e.event_id = ea.event_id
+    GROUP BY e.event_id, e.title, e.description, e.event_date, e.event_time, 
+             e.venue, e.participants_limit, e.category, e.image_url, e.host_id
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching event bookings:", err);
+      return res.status(500).json({ msg: "Error fetching event bookings." });
+    }
+
+    console.log("Event Bookings with Guest Count:", results);
+    res.json(results);
+  });
+});
+
 // Get host by ID
 router.get("/:id", (req, res) => {
   const db = req.app.locals.db;

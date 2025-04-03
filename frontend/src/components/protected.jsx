@@ -19,7 +19,7 @@ const ProtectedRoute = () => {
       if (remainingTime <= 0) {
         console.log("Token has expired. Redirecting to login.");
         localStorage.removeItem("token"); // Remove expired token
-        return <Navigate to="/loginhost" />;
+        return <Navigate to="/register" />;
       }
 
       console.log(
@@ -33,7 +33,7 @@ const ProtectedRoute = () => {
   } catch (error) {
     console.log("Invalid token. Redirecting to login.", error);
     localStorage.removeItem("token");
-    return <Navigate to="/loginhost" />;
+    return <Navigate to="/register" />;
   }
 };
 
