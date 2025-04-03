@@ -29,20 +29,19 @@ const HostD = () => {
     const fetchHostData = async () => {
       try {
         setLoading(true);
+        const baseUrl =
+          import.meta.env.VITE_BASE_URL || "http://localhost:8000";
 
         // Get user ID from token
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
         const hostId = tokenPayload.id;
 
         // Fetch host details
-        const hostResponse = await fetch(
-          `http://localhost:8000/api/hosts/${hostId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const hostResponse = await fetch(`${baseUrl}/api/hosts/${hostId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!hostResponse.ok) {
           throw new Error("Failed to fetch host data");
@@ -65,7 +64,7 @@ const HostD = () => {
         });
 
         // Fetch host's events
-        const eventsResponse = await fetch("http://localhost:8000/api/events", {
+        const eventsResponse = await fetch(`${baseUrl}/api/events`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -82,37 +81,57 @@ const HostD = () => {
           .filter((event) => event.host_id === hostId)
           .map((event) => ({
             id: event.event_id,
+            event_id: event.event_id, // Keep original ID for API calls
             name: event.title,
-            date: new Date(event.event_date).toISOString().split("T")[0],
+            title: event.title,
+            description: event.description,
+            date: event.event_date
+              ? new Date(event.event_date).toLocaleDateString()
+              : "",
             time: event.event_time,
             venue: event.venue,
-            description: event.description,
             category: event.category,
             limit: event.participants_limit,
-            guests: [], // You'll need to fetch this from registrations
-            guestRequests: [], // You'll need to fetch this from registrations
+            // Extract pending guests from the API response
+            guests: [], // Will be populated with approved guests if available
+            guestRequests: event.pending_guests
+              ? event.pending_guests.map((guest) => guest.name)
+              : [], // Extract names from pending guests
           }));
 
-        // For each event, fetch guest registrations
-        // This is a placeholder - you'll need to implement the actual API endpoints
+        // For each event, try to fetch guest registrations if not included in the main API response
         for (const event of hostEvents) {
-          try {
-            // Example API call to get guests for an event
-            // const guestsResponse = await fetch(`http://localhost:8000/api/events/${event.id}/guests`, {
-            //   headers: { Authorization: `Bearer ${token}` }
-            // });
-            // const guestsData = await guestsResponse.json();
-            // event.guests = guestsData.approvedGuests || [];
-            // event.guestRequests = guestsData.pendingGuests || [];
+          if (event.guestRequests.length === 0 && event.event_id) {
+            try {
+              // Try to fetch pending guests if not included in the main API response
+              const guestsResponse = await fetch(
+                `${baseUrl}/api/events/${event.event_id}/guests`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
 
-            // For now, we'll use sample data
-            event.guests = ["Guest 1", "Guest 2"];
-            event.guestRequests = ["Pending 1", "Pending 2"];
-          } catch (error) {
-            console.error(
-              `Error fetching guests for event ${event.id}:`,
-              error
-            );
+              if (guestsResponse.ok) {
+                const guestsData = await guestsResponse.json();
+
+                if (guestsData.pending_guests) {
+                  event.guestRequests = guestsData.pending_guests.map(
+                    (guest) => guest.name
+                  );
+                }
+
+                if (guestsData.approved_guests) {
+                  event.guests = guestsData.approved_guests.map(
+                    (guest) => guest.name
+                  );
+                }
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching guests for event ${event.id}:`,
+                error
+              );
+            }
           }
         }
 
@@ -133,18 +152,19 @@ const HostD = () => {
   }, [navigate]);
 
   const handleCreateEvent = () => {
-    navigate("/newevent");
+    navigate("/post-event"); // Updated to match your route
   };
 
   const handleEditEvent = (id) => {
-    navigate(`/editevent/${id}`);
+    navigate(`/edit-event/${id}`); // Updated to match your route
   };
 
   const handleDeleteEvent = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
+      const baseUrl = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
 
-      await axios.delete(`http://localhost:8000/api/events/${eventId}`, {
+      await axios.delete(`${baseUrl}/api/events/${eventId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -154,8 +174,11 @@ const HostD = () => {
       setEvents((prevEvents) =>
         prevEvents.filter((event) => event.id !== eventId)
       );
+
+      alert("Event deleted successfully");
     } catch (error) {
       console.error("Error deleting event:", error);
+      alert("Failed to delete event");
     }
   };
 
@@ -187,20 +210,24 @@ const HostD = () => {
   const handleGuestRequest = async (eventId, guestName, action) => {
     try {
       const token = localStorage.getItem("token");
+      const baseUrl = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
+
+      // Find the guest request ID based on the name
+      const event = events.find((e) => e.id === eventId);
+      if (!event) return;
 
       // API call to handle guest request approval/rejection
-      // const response = await fetch(`http://localhost:8000/api/events/${eventId}/guests/${guestName}`, {
-      //   method: "PATCH",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`
-      //   },
-      //   body: JSON.stringify({ status: action === "accept" ? "approved" : "rejected" })
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error("Failed to update guest status");
-      // }
+      // Implement the actual endpoint once available
+      await fetch(`${baseUrl}/api/events/${eventId}/guests/${guestName}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: action === "accept" ? "approved" : "rejected",
+        }),
+      });
 
       // Update local state
       setEvents((prevEvents) => {
@@ -222,6 +249,7 @@ const HostD = () => {
       });
     } catch (error) {
       console.error("Error updating guest status:", error);
+      alert("Failed to update guest status");
     }
   };
 
