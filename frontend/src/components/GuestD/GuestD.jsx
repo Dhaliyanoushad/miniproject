@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Ticket from "./Ticket";
 import TicketBookingConfirmation from "./TicketBookingConfirmation";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const GuestD = () => {
   const [registeredEvents, setRegisteredEvents] = useState([]);
@@ -14,64 +15,166 @@ const GuestD = () => {
     date2: "",
   });
   const [guestProfile, setGuestProfile] = useState({
-    name: "Alex Morgan",
-    joinDate: "March 2024",
+    name: "Loading...",
+    joinDate: "",
     image:
-      "https://i.pinimg.com/736x/16/e1/cb/16e1cb84a53ee8cb0e7d8fe72533568e.jpg",
+      "https://i.pinimg.com/736x/16/e1/cb/16e1cb84a53ee8cb0e7d8fe72533568e.jpg", // Default image
   });
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [bookingEvent, setBookingEvent] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const navigate = useNavigate();
+
+  // Fetch current user data
   useEffect(() => {
-    const dummyRegisteredEvents = [
-      {
-        id: 1,
-        name: "Tech Innovation Summit",
-        date: "April 15, 2025",
-        location: "Main Auditorium",
-        status: "Confirmed",
-      },
-      {
-        id: 2,
-        name: "AI & Robotics Workshop",
-        date: "May 5, 2025",
-        location: "Lab 3, Tech Block",
-        status: "Pending",
-      },
-    ];
+    const fetchCurrentUser = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get(
+          "http://localhost:5000/users/profile",
+          {
+            withCredentials: true, // Important for cookies/session
+          }
+        );
 
-    const dummyUpcomingEvents = [
-      {
-        id: 3,
-        name: "Startup Pitch Fest",
-        type: "Startup",
-        date: "June 20, 2025",
-        location: "Convention Center",
-        spots: "Limited spots",
-        price: "$149",
-      },
-      {
-        id: 4,
-        name: "Blockchain Summit",
-        type: "Technology",
-        date: "July 10, 2025",
-        location: "Conference Hall B",
-        spots: "Filling fast",
-        price: "$199",
-      },
-      {
-        id: 5,
-        name: "AI Ethics Conference",
-        type: "AI",
-        date: "August 18, 2025",
-        location: "Hall A",
-        spots: "Available",
-        price: "$129",
-      },
-    ];
+        const userData = response.data;
+        console.log(userData.fullName);
 
-    setRegisteredEvents(dummyRegisteredEvents);
-    setUpcomingEvents(dummyUpcomingEvents);
+        // Format join date from user data
+        const joinDate = new Date(userData.createdAt || Date.now());
+        const formattedJoinDate = joinDate.toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        });
+
+        setGuestProfile({
+          name: userData.fullName || "Guest User",
+          joinDate: formattedJoinDate,
+          image:
+            userData.profilePicture ||
+            "https://i.pinimg.com/736x/16/e1/cb/16e1cb84a53ee8cb0e7d8fe72533568e.jpg",
+          collegeName: userData.collageName || "", // Added from schema
+          studentId: userData.studentIdNumber || "", // Added from schema
+        });
+
+        // Fetch registered events for the user
+        await fetchRegisteredEvents(userData.registeredEvents);
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch user data:", err);
+        setError("Failed to load user profile");
+        setIsLoading(false);
+
+        // Redirect to login if unauthorized
+        if (err.response && err.response.status === 401) {
+          navigate("/loginguest");
+        }
+      }
+    };
+
+    fetchCurrentUser();
+  }, [navigate]);
+
+  // Fetch registered events from IDs
+  const fetchRegisteredEvents = async (eventIds) => {
+    if (!eventIds || eventIds.length === 0) {
+      setRegisteredEvents([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get("/events/registered", {
+        params: { eventIds: eventIds.join(",") },
+        withCredentials: true,
+      });
+
+      // Transform data to match the expected format
+      const transformedEvents = response.data.map((event) => ({
+        id: event._id,
+        name: event.title || event.name,
+        date: new Date(event.date).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        }),
+        location: event.location || "Not specified",
+        status: "Confirmed", // Default status
+        // Add any other relevant fields from your Event schema
+      }));
+
+      setRegisteredEvents(transformedEvents);
+    } catch (error) {
+      console.error("Failed to fetch registered events:", error);
+      setError("Failed to load your registered events");
+    }
+  };
+
+  // Fetch upcoming events
+  useEffect(() => {
+    const fetchUpcomingEvents = async () => {
+      try {
+        const response = await axios.get("/events/upcoming", {
+          withCredentials: true,
+        });
+
+        // Transform data to match the expected format
+        const transformedEvents = response.data.map((event) => ({
+          id: event._id,
+          name: event.title || event.name,
+          type: event.category || "Event",
+          date: new Date(event.date).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }),
+          location: event.location || "Not specified",
+          spots: event.availableSpots
+            ? `${event.availableSpots} spots left`
+            : "Available",
+          price: event.price ? `$${event.price}` : "Free",
+        }));
+
+        setUpcomingEvents(transformedEvents);
+      } catch (error) {
+        console.error("Failed to fetch upcoming events:", error);
+        // Use dummy data as fallback if API fails
+        const dummyUpcomingEvents = [
+          {
+            id: 3,
+            name: "Startup Pitch Fest",
+            type: "Startup",
+            date: "June 20, 2025",
+            location: "Convention Center",
+            spots: "Limited spots",
+            price: "$149",
+          },
+          {
+            id: 4,
+            name: "Blockchain Summit",
+            type: "Technology",
+            date: "July 10, 2025",
+            location: "Conference Hall B",
+            spots: "Filling fast",
+            price: "$199",
+          },
+          {
+            id: 5,
+            name: "AI Ethics Conference",
+            type: "AI",
+            date: "August 18, 2025",
+            location: "Hall A",
+            spots: "Available",
+            price: "$129",
+          },
+        ];
+        setUpcomingEvents(dummyUpcomingEvents);
+      }
+    };
+
+    fetchUpcomingEvents();
   }, []);
 
   const filterEventsByDate = (events) => {
@@ -107,10 +210,23 @@ const GuestD = () => {
     setSelectedTicket(null);
   };
 
-  const handleCancelRegistration = (eventId) => {
-    setRegisteredEvents(
-      registeredEvents.filter((event) => event.id !== eventId)
-    );
+  const handleCancelRegistration = async (eventId) => {
+    try {
+      await axios.post(
+        "/events/cancel-registration",
+        { eventId },
+        { withCredentials: true }
+      );
+
+      // Update UI after successful cancellation
+      setRegisteredEvents(
+        registeredEvents.filter((event) => event.id !== eventId)
+      );
+    } catch (error) {
+      console.error("Failed to cancel registration:", error);
+      // Show error message to user
+      alert("Failed to cancel registration. Please try again.");
+    }
   };
 
   const handleBookTicket = (eventId) => {
@@ -124,25 +240,85 @@ const GuestD = () => {
     setBookingEvent(null);
   };
 
-  const handleConfirmBooking = (confirmedEvent) => {
-    const newRegisteredEvent = {
-      ...confirmedEvent,
-      id:
-        Math.max(...[...registeredEvents, ...upcomingEvents].map((e) => e.id)) +
-        1,
-    };
+  const handleConfirmBooking = async (confirmedEvent) => {
+    try {
+      // Register for the event via API
+      await axios.post(
+        "/events/register",
+        { eventId: confirmedEvent.id },
+        { withCredentials: true }
+      );
 
-    setRegisteredEvents((prev) => [...prev, newRegisteredEvent]);
-    console.log(`Successfully booked ticket for ${confirmedEvent.name}`);
-    setActiveTab("registered");
+      // Update registered events after successful registration
+      const updatedRegisteredEvent = {
+        ...confirmedEvent,
+        status: "Confirmed",
+      };
+
+      setRegisteredEvents((prev) => [...prev, updatedRegisteredEvent]);
+      console.log(`Successfully booked ticket for ${confirmedEvent.name}`);
+      setActiveTab("registered");
+    } catch (error) {
+      console.error("Failed to book event:", error);
+      alert("Failed to book event. Please try again.");
+    }
   };
 
-  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint
+      await axios.post(
+        "http://localhost:5000/users/logout",
+        {},
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      // Navigate to login page regardless of success/failure
+      navigate("/loginguest");
+    }
+  };
+
+  // Get unique event types for filter dropdown
+  const eventTypes = [...new Set(upcomingEvents.map((event) => event.type))];
+
   const filteredUpcomingEvents = upcomingEvents
-    .filter((event) =>
-      event.type.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (event) =>
+        searchQuery === "" ||
+        event.type.toLowerCase() === searchQuery.toLowerCase()
     )
     .filter(filterEventsByDate);
+
+  // Show loading state while fetching user data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-[#261646] to-[#13001E] text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-xl">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-[#261646] to-[#13001E] text-white">
+        <div className="text-center p-8 bg-white/10 rounded-xl border border-white/20 backdrop-blur-sm">
+          <p className="text-xl text-pink-300 mb-4">{error}</p>
+          <button
+            onClick={() => navigate("/loginguest")}
+            className="bg-[#7A3B69]/60 hover:bg-[#7A3B69]/80 py-3 px-6 rounded-lg font-bold shadow-lg shadow-[#7A3B69]/20 transition duration-300"
+          >
+            Return to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-[#261646] to-[#13001E] text-white">
@@ -163,6 +339,16 @@ const GuestD = () => {
           <p className="text-gray-300 text-xs mt-1">
             Member since {guestProfile.joinDate}
           </p>
+          {guestProfile.collegeName && (
+            <p className="text-gray-300 text-xs mt-1">
+              {guestProfile.collegeName}
+            </p>
+          )}
+          {guestProfile.studentId && (
+            <p className="text-gray-300 text-xs mt-1">
+              ID: {guestProfile.studentId}
+            </p>
+          )}
         </div>
 
         <div className="mt-10 w-full space-y-2">
@@ -190,7 +376,7 @@ const GuestD = () => {
 
         <div className="mt-auto w-full pt-6">
           <button
-            onClick={() => navigate("/loginguest")}
+            onClick={handleLogout}
             className="w-full bg-[#7A3B69]/60 hover:bg-[#7A3B69]/80 py-3 rounded-lg font-bold shadow-lg shadow-[#7A3B69]/20 transition duration-300"
           >
             Logout
@@ -224,15 +410,11 @@ const GuestD = () => {
                   <option value="" className="bg-[#261646]">
                     All Event Types
                   </option>
-                  <option value="Startup" className="bg-[#261646]">
-                    Startup
-                  </option>
-                  <option value="Technology" className="bg-[#261646]">
-                    Technology
-                  </option>
-                  <option value="AI" className="bg-[#261646]">
-                    AI
-                  </option>
+                  {eventTypes.map((type) => (
+                    <option key={type} value={type} className="bg-[#261646]">
+                      {type}
+                    </option>
+                  ))}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
                   <svg

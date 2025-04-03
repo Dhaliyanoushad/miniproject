@@ -6,6 +6,7 @@ const connectDB = require("./config/db"); // Import database connection
 const userRoutes = require("./routes/userRoutes");
 const hostRoutes = require("./routes/hostRoutes");
 const adminRoutes = require("./routes/adminRoutes"); // Import admin routes
+const eventRoutes = require("./routes/eventRoutes"); // Import event routes
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,6 +38,7 @@ connectDB();
 app.use("/users", userRoutes);
 app.use("/hosts", hostRoutes);
 app.use("/admins", adminRoutes);
+app.use("/events", eventRoutes); // Import event routes
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./PostEvent.css"; // Importing the styles
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Importing axios for API calls
 
 const PostEvent = () => {
   const navigate = useNavigate();
@@ -9,13 +10,13 @@ const PostEvent = () => {
     description: "",
     date: "",
     time: "",
-    location: "",
-    limit: "",
+    venue: "",
+    capacity: "",
     category: "",
     image: null,
   });
 
-  const [preview, setPreview] = useState(null);
+  // const [preview, setPreview] = useState(null);
 
   // Handle input change
   const handleChange = (e) => {
@@ -23,27 +24,43 @@ const PostEvent = () => {
   };
 
   // Handle file upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setEventData({ ...eventData, image: file });
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setEventData({ ...eventData, image: file });
 
-      // Generate preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
-      setPreview(null);
+  //     // Generate preview URL
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => setPreview(reader.result);
+  //     reader.readAsDataURL(file);
+  //   } else {
+  //     setPreview(null);
+  //   }
+  // };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Upcoming Event Data:", eventData);
+
+    try {
+      // Make API call to create new event using axios
+      await axios.post("http://localhost:5000/events/create", eventData, {
+        withCredentials: true, // Important to include session cookies
+      });
+
+      // Axios automatically throws errors for non-2xx responses
+      // Success case
+      alert("Event created successfully!");
+      navigate("/hostdashboard");
+    } catch (err) {
+      console.error("Error creating event:", err);
+      // Get error message from response if available
+      const errorMsg = err.response?.data?.msg || "Failed to create event";
+      alert(`Error: ${errorMsg}`);
     }
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Upcoming Event Data:", eventData);
-    navigate("/hostdashboard");
-    // Here you would typically send the data to your backend
-  };
   const handleGoBack = () => {
     navigate("/hostdashboard");
   };
@@ -95,9 +112,9 @@ const PostEvent = () => {
           {/* Location */}
           <input
             type="text"
-            name="location"
+            name="venue"
             placeholder="Event Venue"
-            value={eventData.location}
+            value={eventData.venue}
             onChange={handleChange}
             className="event-input"
             required
@@ -105,9 +122,9 @@ const PostEvent = () => {
           {/* Limit */}
           <input
             type="number"
-            name="limit"
+            name="capacity"
             placeholder="Participants Limit"
-            value={eventData.limit}
+            value={eventData.capacity}
             onChange={handleChange}
             className="event-input"
             required
@@ -121,17 +138,17 @@ const PostEvent = () => {
             required
           >
             <option value="">Select Event Category</option>
-            <option value="Music">Music</option>
-            <option value="Business">Business</option>
-            <option value="Technology">Technology</option>
-            <option value="Arts">Arts & Culture</option>
-            <option value="Nightlife">Nightlife</option>
-            <option value="Dining">Dining Experiences</option>
-            <option value="Networking">Networking</option>
-            <option value="Fashion">Fashion & Style</option>
+            <option value="Academic">Academic</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Sports">Sports</option>
+            <option value="Workshops & Seminars">Workshops & Seminars</option>
+            <option value="Exhibitions">Exhibitions</option>
+            <option value="Competitions">Competitions</option>
+            <option value="Volunteering">Volunteering</option>
+            <option value="Others">Others</option>
           </select>
           {/* Image Upload */}
-          <div className="event-file-group">
+          {/* <div className="event-file-group">
             <label className="event-file-label">Upload Event Imagery</label>
             <input
               type="file"
@@ -146,7 +163,7 @@ const PostEvent = () => {
                 className="event-preview"
               />
             )}
-          </div>
+          </div> */}
           {/* Submit and Cancel Buttons */}
           <div className="flex justify-between gap-4 mt-6">
             <button

@@ -83,3 +83,31 @@ exports.currentUser = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+exports.userLogout = async (req, res) => {
+  try {
+    // Check if user is actually logged in
+    if (!req.session.userId) {
+      return res.status(400).json({ msg: "No active session found" });
+    }
+
+    // Destroy the session
+    req.session.destroy((err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Failed to logout", error: err.message });
+      }
+
+      // Clear the cookie if you're using cookie-based sessions
+      res.clearCookie("connect.sid"); // Use your session cookie name here
+
+      return res.status(200).json({
+        success: true,
+        msg: "Logout successful",
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};

@@ -7,6 +7,7 @@ router.get("/", userController.getAllUsers); // Get all users\
 
 router.post("/signup", userController.signUp);
 router.post("/login", userController.userLogin);
-router.get("/current-user", userController.currentUser); // Get current user
+router.get("/profile", userController.currentUser); // Get current user
+router.get("/logout", userController.userLogout); // Logout user
 
 module.exports = router;

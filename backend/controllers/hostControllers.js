@@ -85,3 +85,142 @@ exports.currentHost = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+exports.hostLogout = async (req, res) => {
+  try {
+    // Check if user is actually logged in
+    if (!req.session.hostId) {
+      return res.status(400).json({ msg: "No active session found" });
+    }
+
+    // Destroy the session
+    req.session.destroy((err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Failed to logout", error: err.message });
+      }
+
+      // Clear the cookie if you're using cookie-based sessions
+      res.clearCookie("connect.sid"); // Use your session cookie name here
+
+      return res.status(200).json({
+        success: true,
+        msg: "Logout successful",
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// Get all events created by the host
+exports.getHostEvents = async (req, res) => {
+  try {
+    // Check if host is authenticated
+    if (!req.session.hostId) {
+      return res.status(401).json({ msg: "Not authenticated" });
+    }
+
+    // Find the host and populate their events
+    const host = await Host.findById(req.session.hostId).populate("events");
+
+    if (!host) {
+      return res.status(404).json({ msg: "Host not found" });
+    }
+
+    return res.status(200).json(host.events);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// Get guest requests for a specific event
+exports.getGuestRequests = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    // Check if host is authenticated
+    if (!req.session.hostId) {
+      return res.status(401).json({ msg: "Not authenticated" });
+    }
+
+    // Find the host
+    const host = await Host.findById(req.session.hostId);
+
+    if (!host) {
+      return res.status(404).json({ msg: "Host not found" });
+    }
+
+    // Check if the event belongs to this host
+    const event = await Event.findById(eventId).populate("guestRequests");
+
+    if (!event) {
+      return res.status(404).json({ msg: "Event not found" });
+    }
+
+    // Verify that this host owns this event
+    if (event.host.toString() !== req.session.hostId) {
+      return res
+        .status(403)
+        .json({ msg: "Unauthorized: This event doesn't belong to you" });
+    }
+
+    return res.status(200).json(event.guestRequests);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// Handle guest request (accept/reject)
+exports.handleGuestRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { action } = req.body; // action should be 'accept' or 'reject'
+
+    // Check if host is authenticated
+    if (!req.session.hostId) {
+      return res.status(401).json({ msg: "Not authenticated" });
+    }
+
+    // Validate the action
+    if (action !== "accept" && action !== "reject") {
+      return res
+        .status(400)
+        .json({ msg: "Invalid action. Use 'accept' or 'reject'" });
+    }
+
+    // Find the guest request
+    const guestRequest = await GuestRequest.findById(requestId);
+
+    if (!guestRequest) {
+      return res.status(404).json({ msg: "Guest request not found" });
+    }
+
+    // Find the event to verify ownership
+    const event = await Event.findById(guestRequest.event);
+
+    if (!event) {
+      return res.status(404).json({ msg: "Event not found" });
+    }
+
+    // Verify that this host owns this event
+    if (event.host.toString() !== req.session.hostId) {
+      return res
+        .status(403)
+        .json({ msg: "Unauthorized: This event doesn't belong to you" });
+    }
+
+    // Update the request status based on the action
+    guestRequest.status = action === "accept" ? "approved" : "rejected";
+    await guestRequest.save();
+
+    return res.status(200).json({
+      success: true,
+      msg: `Guest request ${action}ed successfully`,
+      guestRequest,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
