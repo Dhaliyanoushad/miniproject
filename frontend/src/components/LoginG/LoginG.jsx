@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import "./LoginG.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 
 const LoginG = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (!email || !password) {
       setError("Please enter both Email and Password.");
       return;
@@ -18,12 +22,13 @@ const LoginG = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/users/login",
+        `${import.meta.env.VITE_BASE_URL}/auth/loginguest`,
         { email, password },
         { withCredentials: true }
       );
 
-      if (response.data.success) {
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
         navigate("/guestdashboard");
       } else {
         setError("Invalid credentials. Please try again.");
@@ -33,7 +38,6 @@ const LoginG = () => {
         error.response?.data?.msg ||
           "Login failed. Please check your credentials and try again."
       );
-      console.error("Login error:", error);
     }
   };
 
@@ -57,14 +61,22 @@ const LoginG = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          {/* Password */}
-          <input
-            className="lg-auth__input"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          {/* Password Input with Eye Icon */}
+          <div className="relative w-full">
+            <input
+              className="lh-auth__input pr-10" // Added padding for icon spacing
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span
+              className="absolute right-3 top-3 text-gray-500 cursor-pointer hover:text-gray-700"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
           {/* Remember Me & Forgot Password */}
           <div className="lg-auth__form-group">

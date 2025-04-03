@@ -5,6 +5,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const hostRoutes = require("./routes/hostRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const guestRoutes = require("./routes/guestRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,6 +50,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/api/hosts", hostRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/guests", guestRoutes);
 
 // Start the server
 app.listen(PORT, () => {

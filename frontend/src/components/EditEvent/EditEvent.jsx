@@ -1,141 +1,116 @@
 import React, { useState, useEffect } from "react";
+import "./EditEvent.css"; // Reusing the same styles
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios"; // Make sure axios is installed
+import axios from "axios";
 
 const EditEvent = () => {
   const navigate = useNavigate();
-  const { eventId } = useParams(); // Get event ID from URL
+  const { event_id } = useParams(); // Ensure this matches the route in App.js
+  console.log("Event ID from URL:", event_id);
+  const [isLoading, setIsLoading] = useState(true);
   const [eventData, setEventData] = useState({
     title: "",
     description: "",
-    event_date: "", // Changed from "date" to match backend
-    event_time: "", // Changed from "time" to match backend
-    venue: "", // Changed from "location" to match backend
-    participants_limit: "", // Added to match backend
+    event_date: "",
+    event_time: "",
+    venue: "",
+    participants_limit: "",
     category: "",
-    image: null,
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  // const [preview, setPreview] = useState(null);
 
-  // Get auth token from localStorage
-  const token = localStorage.getItem("token");
-
+  // Fetch event data when component mounts
   useEffect(() => {
-    // Fetch event details from backend
-    const fetchEventDetails = async () => {
+    const fetchEventData = async () => {
+      console.log("Event ID:", event_id);
+
+      const token = localStorage.getItem("token");
       try {
-        setLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}//api/events/${eventId}`,
+          `${import.meta.env.VITE_BASE_URL}/api/events/${event_id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: "Bearer " + token,
             },
           }
         );
 
-        // Transform backend data to match component state
-        const event = response.data;
+        const event = response.data.event;
+        const formattedDate = event.event_date
+          ? new Date(event.event_date).toISOString().split("T")[0]
+          : "";
+
         setEventData({
-          title: event.title,
-          description: event.description,
-          event_date: event.event_date,
-          event_time: event.event_time,
-          venue: event.venue,
-          participants_limit: event.participants_limit,
-          category: event.category,
-          image: null,
+          ...event,
+          event_date: formattedDate,
         });
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-        setError("Failed to load event details");
-        setLoading(false);
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching event:", err);
+        alert("Failed to load event details");
+        navigate("/hostdashboard");
       }
     };
 
-    if (eventId) {
-      fetchEventDetails();
-    }
-  }, [eventId, token]);
+    fetchEventData();
+  }, [event_id, navigate]);
 
   // Handle input change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEventData({ ...eventData, [name]: value });
+    setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
-
-  // Handle file upload
-  // const handleFileChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setEventData({ ...eventData, image: file });
-
-  //     // Generate preview URL
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => setPreview(reader.result);
-  //     reader.readAsDataURL(file);
-  //   } else {
-  //     setPreview(null);
-  //   }
-  // };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    // Format event_date before sending to backend
+    const formattedEventData = {
+      ...eventData,
+      event_date: eventData.event_date
+        ? new Date(eventData.event_date).toISOString().split("T")[0]
+        : "",
+    };
 
     try {
-      // Create form data object for image upload
-      const formData = new FormData();
-      formData.append("title", eventData.title);
-      formData.append("description", eventData.description);
-      formData.append("event_date", eventData.event_date);
-      formData.append("event_time", eventData.event_time);
-      formData.append("venue", eventData.venue);
-      formData.append("participants_limit", eventData.participants_limit);
-      formData.append("category", eventData.category);
-
-      if (eventData.image) {
-        formData.append("image", eventData.image);
-      }
-
-      // Send updated event data to backend
-      await axios.put(
-        `${import.meta.env.VITE_BASE_URL}//api/events/${eventId}`,
-        formData,
+      const response = await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/api/events/${event_id}`,
+        formattedEventData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            Authorization: "Bearer " + token,
           },
         }
       );
 
-      // Navigate back to host dashboard after successful update
+      alert(response.data.msg || "Event updated successfully");
       navigate("/hostdashboard");
-    } catch (error) {
-      console.error("Error updating event:", error);
-      setError("Failed to update event");
+    } catch (err) {
+      console.error("Error updating event:", err);
+      alert(err.response?.data?.msg || "Failed to update event");
     }
   };
 
-  // Handle go back
   const handleGoBack = () => {
     navigate("/hostdashboard");
   };
 
-  if (loading)
-    return <div className="event-container">Loading event details...</div>;
-  if (error) return <div className="event-container">{error}</div>;
+  if (isLoading) {
+    return (
+      <div className="post-event hostd">
+        <div className="event-container">
+          <h2 className="event-title">Loading event details...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="post-event hostd">
       <div className="event-container">
         <h2 className="event-title">Edit Event</h2>
         <form onSubmit={handleSubmit} className="event-form">
-          {/* Event Title */}
           <input
             type="text"
             name="title"
@@ -145,7 +120,6 @@ const EditEvent = () => {
             className="event-input"
             required
           />
-          {/* Event Description */}
           <textarea
             name="description"
             placeholder="Event Description"
@@ -155,7 +129,6 @@ const EditEvent = () => {
             className="event-input"
             required
           ></textarea>
-          {/* Date & Time */}
           <div className="event-flex">
             <input
               type="date"
@@ -174,7 +147,6 @@ const EditEvent = () => {
               required
             />
           </div>
-          {/* Venue */}
           <input
             type="text"
             name="venue"
@@ -184,7 +156,6 @@ const EditEvent = () => {
             className="event-input"
             required
           />
-          {/* Participants Limit */}
           <input
             type="number"
             name="participants_limit"
@@ -194,7 +165,6 @@ const EditEvent = () => {
             className="event-input"
             required
           />
-          {/* Category */}
           <select
             name="category"
             value={eventData.category}
@@ -212,26 +182,7 @@ const EditEvent = () => {
             <option value="Networking">Networking</option>
             <option value="Fashion">Fashion & Style</option>
           </select>
-          {/* Image Upload */}
-          <div className="event-file-group">
-            <label className="event-file-label">
-              Upload New Image (Optional)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="event-file-input"
-            />
-            {preview && (
-              <img
-                src={preview}
-                alt="Event Preview"
-                className="event-preview"
-              />
-            )}
-          </div>
-          {/* Submit and Cancel Buttons */}
+
           <div className="flex justify-between gap-4 mt-6">
             <button
               type="button"
@@ -241,7 +192,7 @@ const EditEvent = () => {
               Cancel
             </button>
             <button type="submit" className="event-btn flex-1">
-              Update Event
+              Update Experience
             </button>
           </div>
         </form>

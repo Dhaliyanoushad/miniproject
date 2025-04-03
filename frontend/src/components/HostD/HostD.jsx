@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const HostD = () => {
   const navigate = useNavigate();
@@ -135,29 +136,24 @@ const HostD = () => {
     navigate("/newevent");
   };
 
-  const handleEditEvent = () => {
-    navigate(`/editevent`);
+  const handleEditEvent = (id) => {
+    navigate(`/editevent/${id}`);
   };
 
   const handleDeleteEvent = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8000/api/events/${eventId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error("Failed to delete event");
-      }
+      await axios.delete(`http://localhost:8000/api/events/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       // Remove event from state
-      setEvents(events.filter((event) => event.id !== eventId));
+      setEvents((prevEvents) =>
+        prevEvents.filter((event) => event.id !== eventId)
+      );
     } catch (error) {
       console.error("Error deleting event:", error);
     }

@@ -98,11 +98,11 @@ const AppContent = () => {
             {/* Host Dashboard*/}
             <Route element={<ProtectedRoute />}>
               <Route path="/hostdashboard" element={<HostDashboard />} />
+              <Route path="/guestdashboard" element={<GuestDashboard />} />
             </Route>{" "}
             <Route path="/newevent" element={<NewEvent />} />
-            <Route path="/editevent" element={<EditEvent />} />
+            <Route path="/editevent/:event_id" element={<EditEvent />} />{" "}
             {/* Guest Dashboard */}
-            <Route path="/guestdashboard" element={<GuestDashboard />} />
             {/* Register Routes */}
             <Route path="/register" element={<Register />} />
             <Route path="/loginhost" element={<LoginHost />} />

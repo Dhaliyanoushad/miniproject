@@ -6,7 +6,7 @@ const ProtectedRoute = () => {
 
   if (!token) {
     console.log("No token found. Redirecting to login.");
-    return <Navigate to="/loginhost" />;
+    return <Navigate to="/register" />;
   }
 
   try {

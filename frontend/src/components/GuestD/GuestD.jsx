@@ -144,6 +144,11 @@ const GuestD = () => {
     )
     .filter(filterEventsByDate);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/loginhost");
+  };
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-[#261646] to-[#13001E] text-white">
       {/* Sidebar */}
@@ -190,7 +195,7 @@ const GuestD = () => {
 
         <div className="mt-auto w-full pt-6">
           <button
-            onClick={() => navigate("/loginguest")}
+            onClick={handleLogout}
             className="w-full bg-[#7A3B69]/60 hover:bg-[#7A3B69]/80 py-3 rounded-lg font-bold shadow-lg shadow-[#7A3B69]/20 transition duration-300"
           >
             Logout
