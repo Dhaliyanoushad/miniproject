@@ -24,7 +24,7 @@ const SuperAdminLogin = () => {
       );
 
       if (response.data.success) {
-        navigate("/admindashboard");
+        navigate("/test");
       } else {
         setError("Invalid credentials. Please try again.");
       }
