@@ -40,9 +40,9 @@ const SignUpG = () => {
         formData
       );
       alert(response.data.msg);
-      localStorage.setItem("guest", JSON.stringify(response.data.guest));
-      localStorage.setItem("token", response.data.token);
-      navigate("/guestdashboard");
+      // localStorage.setItem("guest", JSON.stringify(response.data.guest));
+      // localStorage.setItem("token", response.data.token);
+      navigate("/loginguest");
 
       console.log(localStorage.getItem("user"));
     } catch (err) {

@@ -68,7 +68,7 @@ router.post("/signuphost", async (req, res) => {
           const token = jwt.sign(
             { id: result.insertId, email: email },
             SECRET_KEY,
-            { expiresIn: "1h" }
+            { expiresIn: "24h" }
           );
           const host = {
             id: result.insertId,
@@ -144,7 +144,7 @@ router.post("/signupguest", async (req, res) => {
           const token = jwt.sign(
             { id: result.insertId, email: email },
             SECRET_KEY,
-            { expiresIn: "1h" }
+            { expiresIn: "24h" }
           );
 
           const guest = {
@@ -189,6 +189,9 @@ router.post("/loginhost", async (req, res) => {
     }
 
     const user = results[0];
+    if (!user.is_approved) {
+      return res.status(403).json({ msg: "Your account is not approved yet." });
+    }
 
     // Compare provided password with the hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);
@@ -200,7 +203,7 @@ router.post("/loginhost", async (req, res) => {
     const token = jwt.sign(
       { id: user.host_id, email: user.email },
       SECRET_KEY,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     res.status(200).json({ msg: "Login successful", token, host: user });
@@ -226,6 +229,9 @@ router.post("/loginguest", async (req, res) => {
     }
 
     const user = results[0];
+    if (!user.is_approved) {
+      return res.status(403).json({ msg: "Your account is not approved yet." });
+    }
 
     // Compare provided password with the hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);
@@ -237,7 +243,7 @@ router.post("/loginguest", async (req, res) => {
     const token = jwt.sign(
       { id: user.guest_id, email: user.email },
       SECRET_KEY,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     res.status(200).json({
@@ -246,6 +252,44 @@ router.post("/loginguest", async (req, res) => {
       guest: user,
     });
   });
+});
+
+router.post("/loginadmin", async (req, res) => {
+  const db = req.app.locals.db;
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, msg: "Missing credentials" });
+  }
+
+  try {
+    // Step 1: Check if the username exists
+    const query = "SELECT * FROM admin WHERE username = ?";
+    db.query(query, [username], (err, results) => {
+      if (err) {
+        return res.status(500).json({ success: false, msg: "Database error" });
+      }
+
+      if (results.length === 0) {
+        // No admin with that username
+        return res.status(404).json({ success: false, msg: "Admin not found" });
+      }
+
+      const admin = results[0];
+
+      // Step 2: Check if the password matches
+      if (admin.password !== password) {
+        return res
+          .status(401)
+          .json({ success: false, msg: "Incorrect password" });
+      }
+
+      // Step 3: Success
+      return res.json({ success: true, msg: "Login successful" });
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, msg: "Server error" });
+  }
 });
 
 // Optional: Token verification route

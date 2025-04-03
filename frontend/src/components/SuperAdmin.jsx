@@ -1,16 +1,42 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LockIcon, UserIcon } from "lucide-react";
+import axios from "axios";
 
 const SuperAdminLogin = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Placeholder for login logic
-    console.log("Login attempt:", username);
+    setError("");
+
+    if (!username || !password) {
+      setError("Please enter both Username and Password.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const baseUrl = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
+      const response = await axios.post(`${baseUrl}/auth/loginadmin`, {
+        username,
+        password,
+      });
+
+      if (response.data.success) {
+        navigate("/superadmindashboard");
+      } else {
+        setError(response.data.msg || "Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      setError(error.response?.data?.msg || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,6 +71,11 @@ const SuperAdminLogin = () => {
           <p className="text-sm text-center text-[#9a879d] mb-6">
             Secure Access Required
           </p>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-2 rounded mb-4 text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username Input */}
@@ -81,7 +112,7 @@ const SuperAdminLogin = () => {
               />
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember Me & Forgot Password
             <div className="flex justify-between items-center text-sm text-[#b8a0c9]">
               <label className="flex items-center cursor-pointer">
                 <input
@@ -90,23 +121,18 @@ const SuperAdminLogin = () => {
                 />
                 <span className="select-none">Remember me</span>
               </label>
-              {/* <a
-                href="#"
-                className="text-[#9a879d] hover:text-[#b8a0c9] transition duration-300"
-              >
-                Forgot password?
-              </a> */}
-            </div>
+              
+            </div> */}
 
             {/* Login Button */}
             <button
               type="submit"
-              onClick={() => navigate("/superadmindashboard")}
-              className="w-full py-3 mt-6 bg-[#5c4b73] text-white rounded-xl 
-                         hover:bg-[#866a9a] transition duration-300 text-base 
-                         transform hover:-translate-y-1 hover:shadow-xl"
+              disabled={isLoading || !username || !password}
+              className="w-full py-3 mt-4 bg-[#5c4b73] text-white rounded-lg 
+                     hover:bg-[#866a9a] transition duration-300
+                     disabled:bg-[#5c4b73]/50 disabled:cursor-not-allowed"
             >
-              Secure Login
+              {isLoading ? "Logging in..." : "Secure Login"}
             </button>
           </form>
 

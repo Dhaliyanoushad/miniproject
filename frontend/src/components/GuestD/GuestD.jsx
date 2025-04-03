@@ -20,9 +20,9 @@ const GuestD = () => {
 
     setGuestProfile({
       ...guest,
-      joined: `${new Date(guest.joined).toLocaleString("en-US", {
+      created_at: `${new Date(guest.created_at).toLocaleString("en-US", {
         month: "long",
-      })} ${new Date(guest.joined).getFullYear()}`,
+      })} ${new Date(guest.created_at).getFullYear()}`,
     });
 
     if (!token) {
@@ -35,7 +35,7 @@ const GuestD = () => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BASE_URL}/api/events/eventbookings/${
-            guest.id
+            guest.guest_id
           }`,
           {
             headers: {
@@ -112,7 +112,7 @@ const GuestD = () => {
       const token = localStorage.getItem("token");
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/api/events/bookticket`,
-        { guest_id: guestProfile.id, event_id: eventId },
+        { guest_id: guestProfile.guest_id, event_id: eventId },
         {
           headers: { Authorization: "Bearer " + token },
         }
@@ -120,7 +120,7 @@ const GuestD = () => {
 
       if (response.status === 200) {
         alert(`Ticket booked for ${event.title}!`); // Changed from event.name to event.title
-        handleConfirmBooking(event);
+        addRegEvent(event);
       } else {
         alert("Failed to book ticket. Please try again.");
       }
@@ -134,25 +134,15 @@ const GuestD = () => {
     setBookingEvent(null);
   };
 
-  const handleConfirmBooking = (confirmedEvent) => {
-    const newRegisteredEvent = {
-      ...confirmedEvent,
-      id:
-        Math.max(
-          ...[...registeredEvents, ...upcomingEvents].map((e) => e.id),
-          0
-        ) + 1,
-      status: "Confirmed",
-    };
-
-    setRegisteredEvents((prev) => [...prev, newRegisteredEvent]);
-    console.log(`Successfully booked ticket for ${confirmedEvent.name}`);
+  const addRegEvent = (event) => {
+    setRegisteredEvents((prev) => [...prev, event]);
+    console.log(`Successfully booked ticket for ${event.name}`);
     setActiveTab("registered");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/loginhost");
+    navigate("/loginguest");
   };
 
   return (
@@ -169,10 +159,10 @@ const GuestD = () => {
             />
           </div>
           <h2 className="mt-4 text-xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">
-            Welcome, {guestProfile.name}
+            Welcome, {guestProfile.full_name}
           </h2>
           <p className="text-gray-300 text-xs mt-1">
-            Member since {guestProfile.joined}
+            Member since {guestProfile.created_at}
           </p>
           <p className="text-gray-300 text-s mt-1">
             Student ID:{guestProfile.student_id}
@@ -281,9 +271,9 @@ const GuestD = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {registeredEvents.map((event) => (
+                {registeredEvents.map((event, index) => (
                   <div
-                    key={event.id}
+                    key={`registered-event-${index}`}
                     className="p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm"
                   >
                     <div className="flex justify-between">
@@ -294,8 +284,8 @@ const GuestD = () => {
                         className={`px-2 pt-2 pb-1 rounded-full text-xs font-semibold ${
                           event.booking_status === "Pending"
                             ? "bg-yellow-300 text-black"
-                            : event.booking_status === "Confirmed"
-                            ? "bg-green-500 text-white"
+                            : event.booking_status === "Confirm"
+                            ? "bg-green-500 text-black"
                             : "bg-red-500 text-white"
                         }`}
                       >
@@ -337,9 +327,9 @@ const GuestD = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event) => (
+              {upcomingEvents.map((event, index) => (
                 <div
-                  key={event.event_id}
+                  key={`upcoming-event-${index}`}
                   className="group relative p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm overflow-hidden"
                 >
                   {/* <div className="absolute inset-0 bg-white/5 transform scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-500"></div> */}
@@ -412,13 +402,13 @@ const GuestD = () => {
       )}
 
       {/* Booking Confirmation Modal */}
-      {bookingEvent && (
+      {/* {bookingEvent && (
         <TicketBookingConfirmation
           event={bookingEvent}
           onClose={handleCloseBooking}
           onConfirm={handleConfirmBooking}
         />
-      )}
+      )} */}
     </div>
   );
 };

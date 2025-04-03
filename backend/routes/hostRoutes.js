@@ -15,6 +15,45 @@ router.get("/", (req, res) => {
     res.json(results);
   });
 });
+router.patch("/:host_id", (req, res) => {
+  const db = req.app.locals.db;
+  const { host_id } = req.params; // Get ID from URL
+  const { is_approved } = req.body;
+
+  if (!host_id) {
+    return res.status(400).json({ message: "Host ID is required" });
+  }
+
+  const sql = "UPDATE hosts SET is_approved = ? WHERE host_id = ?";
+
+  db.query(sql, [is_approved, host_id], (err, result) => {
+    if (err) {
+      console.error("Error updating host status:", err);
+      return res.status(500).json({ message: "Failed to update host status" });
+    }
+
+    res.json({ message: "Host status updated successfully" });
+  });
+});
+
+// Delete a host
+router.delete("/", async (req, res) => {
+  const db = req.app.locals.db;
+  try {
+    const { host_id } = req.body;
+
+    if (!host_id) {
+      return res.status(400).json({ message: "Host ID is required" });
+    }
+
+    await db.query("DELETE FROM hosts WHERE host_id = ?", [host_id]);
+
+    res.json({ message: "Host deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting host:", error);
+    res.status(500).json({ message: "Failed to delete host" });
+  }
+});
 
 router.get("/events", (req, res) => {
   const db = req.app.locals.db;

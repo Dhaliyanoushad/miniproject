@@ -40,12 +40,16 @@ const SignUpH = () => {
         formData
       );
       alert(response.data.msg);
-      localStorage.setItem("host", JSON.stringify(response.data.host));
-      localStorage.setItem("token", response.data.token);
-      navigate("/hostdashboard");
+      // localStorage.setItem("host", JSON.stringify(response.data.host));
+      // localStorage.setItem("token", response.data.token);
+      navigate("/loginhost");
     } catch (err) {
       console.log(err);
-      alert(err.response?.data?.missingFields || "Something went wrong");
+      alert(
+        err.response?.data?.missingFields ||
+          err.response?.data?.msg ||
+          "Something went wrong"
+      );
     }
   };
 

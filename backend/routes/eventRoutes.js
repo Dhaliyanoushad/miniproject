@@ -285,76 +285,48 @@ router.post("/updateBookingStatus", verifyToken, (req, res) => {
   });
 });
 
-// Update guest request status (Approve/Reject)
+// Update guest request status (Confirm/Reject)
 router.patch("/:event_id/guests/:guest_id", verifyToken, (req, res) => {
   const db = req.app.locals.db;
   const { event_id, guest_id } = req.params;
-  const { booking_status } = req.body; // "Approved" or "Rejected"
+  const { booking_status } = req.body; // "Confirm" or "Reject"
 
   if (!booking_status) {
     return res.status(400).json({ msg: "Please provide booking status." });
     a;
   }
+  const updateSql =
+    "UPDATE EventApproval SET booking_status = ? WHERE event_id = ? AND guest_id = ?";
 
-  // Verify that the event exists
-  const checkEventSql = "SELECT host_id FROM events WHERE event_id = ?";
-
-  db.query(checkEventSql, [event_id], (err, results) => {
-    if (err) {
-      console.error("Error checking event:", err);
-      return res.status(500).json({ msg: "Server error" });
+  db.query(updateSql, [booking_status, event_id, guest_id], (updateErr) => {
+    if (updateErr) {
+      console.error("Error updating booking status:", updateErr);
+      return res.status(500).json({ msg: "Error updating guest request" });
     }
-
-    if (results.length === 0) {
-      return res.status(404).json({ msg: "Event not found3" });
-    }
-
-    const event = results[0];
-
-    // Check if the current user is the host
-    if (event.host_id !== req.user.id) {
-      return res
-        .status(403)
-        .json({ msg: "You are not authorized to update this guest request" });
-    }
-
-    // If approved, move to guests table; if rejected, just update the status
-    if (booking_status === "Approved") {
-      const insertGuestSql =
-        "INSERT INTO guests (event_id, guest_id) VALUES (?, ?)";
-
-      db.query(insertGuestSql, [event_id, guest_id], (insertErr) => {
-        if (insertErr) {
-          console.error("Error inserting guest:", insertErr);
-          return res.status(500).json({ msg: "Error approving guest request" });
-        }
-
-        // Remove from EventApproval
-        const deleteRequestSql =
-          "DELETE FROM EventApproval WHERE event_id = ? AND guest_id = ?";
-
-        db.query(deleteRequestSql, [event_id, guest_id], (deleteErr) => {
-          if (deleteErr) {
-            console.error("Error removing guest request:", deleteErr);
-            return res.status(500).json({ msg: "Error finalizing approval" });
-          }
-          res.json({ msg: "Guest request approved successfully" });
-        });
-      });
-    } else {
-      // Just update the status if rejected
-      const updateSql =
-        "UPDATE EventApproval SET booking_status = ? WHERE event_id = ? AND guest_id = ?";
-
-      db.query(updateSql, [booking_status, event_id, guest_id], (updateErr) => {
-        if (updateErr) {
-          console.error("Error updating booking status:", updateErr);
-          return res.status(500).json({ msg: "Error rejecting guest request" });
-        }
-        res.json({ msg: "Guest request rejected successfully" });
-      });
-    }
+    res.json({ msg: "Guest request updated successfully" });
   });
+  // Verify that the event exists
+  // const checkEventSql = "SELECT host_id FROM events WHERE event_id = ?";
+
+  // db.query(checkEventSql, [event_id], (err, results) => {
+  //   if (err) {
+  //     console.error("Error checking event:", err);
+  //     return res.status(500).json({ msg: "Server error" });
+  //   }
+
+  //   if (results.length === 0) {
+  //     return res.status(404).json({ msg: "Event not found3" });
+  //   }
+
+  //   const event = results[0];
+
+  //   // Check if the current user is the host
+  //   if (event.host_id !== req.user.id) {
+  //     return res
+  //       .status(403)
+  //       .json({ msg: "You are not authorized to update this guest request" });
+  //   }
+  // });
 });
 
 router.get("/myevents/:id", verifyToken, (req, res) => {

@@ -87,7 +87,7 @@ const AppContent = () => {
         <div>
           <Routes>
             {/* Main Routes */}
-            <Route path="/test" element={<Test />} />
+            <Route path="/superadmindashboard" element={<Test />} />
             <Route
               path={`/${import.meta.env.VITE_SUPER_ADMIN}`}
               element={<SuperAdminDashboard />}
