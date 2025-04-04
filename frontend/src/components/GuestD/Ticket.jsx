@@ -13,6 +13,12 @@ const Ticket = ({ guestName, event, onClose }) => {
     day: "numeric",
   });
 
+  const event_date = new Date(event.event_date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-gradient-to-br from-[#1a1428] to-[#2a1a3a] rounded-xl overflow-hidden w-full max-w-md relative">
@@ -46,28 +52,28 @@ const Ticket = ({ guestName, event, onClose }) => {
         {/* Ticket content */}
         <div className="p-6">
           {/* Event name */}
-          <h3 className="text-2xl font-bold text-white mb-4">{event.name}</h3>
+          <h3 className="text-2xl font-bold text-white mb-4">{event.title}</h3>
 
           {/* Event details */}
           <div className="space-y-3 mb-6">
             <div className="flex justify-between">
               <span className="text-gray-400">Date:</span>
-              <span className="text-white font-medium">{event.date}</span>
+              <span className="text-white font-medium">{event_date}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Location:</span>
-              <span className="text-white font-medium">{event.location}</span>
+              <span className="text-white font-medium">{event.venue}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Status:</span>
               <span
                 className={`font-medium ${
-                  event.status === "Confirmed"
+                  event.status === "Confirm"
                     ? "text-green-300"
                     : "text-yellow-300"
                 }`}
               >
-                {event.status}
+                {event.booking_status}
               </span>
             </div>
             <div className="flex justify-between">
@@ -89,7 +95,7 @@ const Ticket = ({ guestName, event, onClose }) => {
           </div>
 
           {/* QR Code placeholder */}
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <div className="bg-white p-4 rounded-lg w-40 h-40 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-black text-xs mb-2">Scan for entry</div>
@@ -98,7 +104,7 @@ const Ticket = ({ guestName, event, onClose }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Ticket footer */}

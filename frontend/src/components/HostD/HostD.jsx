@@ -116,14 +116,14 @@ const HostD = () => {
       setEvents((prevEvents) => {
         return prevEvents.map((event) => {
           if (event.event_id === eventId) {
-            // Update the pending_guests array by changing the status of the specified guest
-            const updatedPendingGuests = event.pending_guests.filter(
+            // Update the registered_guests array by changing the status of the specified guest
+            const updatedPendingGuests = event.registered_guests.filter(
               (guest) => guest.guest_id !== guestId
             );
 
             return {
               ...event,
-              pending_guests: updatedPendingGuests,
+              registered_guests: updatedPendingGuests,
             };
           }
           return event;
@@ -213,7 +213,7 @@ const HostD = () => {
           events.map((event) => {
             // Filter pending guests (those with "Pending" status)
             const pendingGuests =
-              event.pending_guests?.filter(
+              event.registered_guests?.filter(
                 (guest) => guest.booking_status === "Pending"
               ) || [];
 

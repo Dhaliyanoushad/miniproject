@@ -83,7 +83,9 @@ const GuestD = () => {
   }, [navigate]); // Removed upcomingEvents from dependencies
 
   const handleViewTicket = (eventId) => {
-    const event = registeredEvents.find((event) => event.id === eventId);
+    const event = registeredEvents.find((event) => event.event_id === eventId);
+    console.log("event", event);
+
     if (event) {
       setSelectedTicket(event);
     }
@@ -93,10 +95,53 @@ const GuestD = () => {
     setSelectedTicket(null);
   };
 
-  const handleCancelRegistration = (eventId) => {
-    setRegisteredEvents(
-      registeredEvents.filter((event) => event.id !== eventId)
+  const handleCancelRegistration = async (eventId) => {
+    const confirmCancel = window.confirm(
+      "Are you sure you want to cancel this registration?"
     );
+    if (!confirmCancel) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Attempting to cancel booking:", {
+        event_id: eventId,
+        guest_id: guestProfile.guest_id,
+      });
+
+      // Use DELETE with axios and pass data in the config object
+      const response = await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/api/events/cancelbooking`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          data: {
+            guest_id: guestProfile.guest_id,
+            event_id: eventId,
+          },
+        }
+      );
+
+      console.log("Cancellation response:", response.data);
+
+      if (response.data.success) {
+        // Update UI by removing the cancelled event
+        setRegisteredEvents(
+          registeredEvents.filter((event) => event.event_id !== eventId)
+        );
+        alert("Registration cancelled successfully");
+      } else {
+        alert("Failed to cancel registration: " + response.data.message);
+      }
+    } catch (error) {
+      console.error(
+        "Error cancelling registration:",
+        error.response?.data || error.message
+      );
+      alert(
+        `Error cancelling registration: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
   };
 
   const handleBookTicket = async (eventId) => {
@@ -153,15 +198,17 @@ const GuestD = () => {
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-pink-500/30 blur-md"></div>
             <img
-              src={guestProfile.image}
+              src={
+                "https://i.pinimg.com/736x/5b/53/b9/5b53b955f7910e9c4cfacbf2eff2ed85.jpg"
+              }
               alt="Guest Profile"
               className="relative w-24 h-24 rounded-full border-4 border-[#7A3B69] object-cover"
             />
           </div>
-          <h2 className="mt-4 text-xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">
+          <h2 className="mt-4 text-2xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">
             Welcome, {guestProfile.full_name}
           </h2>
-          <p className="text-gray-300 text-xs mt-1">
+          <p className="text-gray-300 text-s mt-1">
             Member since {guestProfile.created_at}
           </p>
           <p className="text-gray-300 text-s mt-1">
@@ -221,24 +268,46 @@ const GuestD = () => {
               <div className="relative flex-1">
                 <select
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                    focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
+                  onChange={(e) => {
+                    console.log("Selected Value:", e.target.value);
+                    setSearchQuery(e.target.value);
+                  }}
+                  className="appearance-none w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
+                   focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
                 >
                   <option value="" className="bg-[#261646]">
-                    All Event Types
+                    Select Event Category
                   </option>
-                  <option value="Startup" className="bg-[#261646]">
-                    Startup
+                  <option value="Workshops" className="bg-[#261646]">
+                    Workshops
                   </option>
-                  <option value="Technology" className="bg-[#261646]">
-                    Technology
+                  <option value="Seminars" className="bg-[#261646]">
+                    Seminars
                   </option>
-                  <option value="AI" className="bg-[#261646]">
-                    AI
+                  <option value="Hackathons" className="bg-[#261646]">
+                    Hackathons
+                  </option>
+                  <option value="Cultural" className="bg-[#261646]">
+                    Cultural Festivals
+                  </option>
+                  <option value="Sports" className="bg-[#261646]">
+                    Sports & Games
+                  </option>
+                  <option value="Technical" className="bg-[#261646]">
+                    Technical Events
+                  </option>
+                  <option value="Fests" className="bg-[#261646]">
+                    College Fests
+                  </option>
+                  <option value="Debates" className="bg-[#261646]">
+                    Debates & Discussions
+                  </option>
+                  <option value="Career" className="bg-[#261646]">
+                    Career & Networking
                   </option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
+                {/* Dropdown Arrow Icon */}
+                <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
                   <svg
                     className="w-5 h-5"
                     xmlns="http://www.w3.org/2000/svg"
@@ -289,7 +358,11 @@ const GuestD = () => {
                             : "bg-red-500 text-white"
                         }`}
                       >
-                        {event.booking_status}
+                        {event.booking_status === "Confirm"
+                          ? "Confirmed"
+                          : event.booking_status === "Pending"
+                          ? "Pending"
+                          : "Cancelled"}
                       </span>
                     </div>
                     <div className="mt-4 space-y-2">
@@ -302,13 +375,13 @@ const GuestD = () => {
                     </div>
                     <div className="mt-6 flex gap-3">
                       <button
-                        onClick={() => handleViewTicket(event.id)}
+                        onClick={() => handleViewTicket(event.event_id)}
                         className="flex-1 bg-[#866A9A]/40 hover:bg-[#866A9A]/60 px-4 py-2 text-white rounded-lg font-medium transition"
                       >
                         View Ticket
                       </button>
                       <button
-                        onClick={() => handleCancelRegistration(event.id)}
+                        onClick={() => handleCancelRegistration(event.event_id)}
                         className="bg-[#7A3B69]/60 hover:bg-[#7A3B69]/80 px-4 py-2 text-white rounded-lg transition"
                       >
                         Cancel
@@ -395,7 +468,7 @@ const GuestD = () => {
       {/* Ticket Modal */}
       {selectedTicket && (
         <Ticket
-          guestName={guestProfile.name}
+          guestName={guestProfile.full_name}
           event={selectedTicket}
           onClose={handleCloseTicket}
         />

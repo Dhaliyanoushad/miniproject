@@ -83,7 +83,7 @@ router.post("/signuphost", async (req, res) => {
           // localStorage.setItem("token", token);
 
           return res.status(201).json({
-            msg: "Signup successful",
+            msg: "Signup successful, waiting for admin approval",
             token,
             host: host,
           });
@@ -229,9 +229,6 @@ router.post("/loginguest", async (req, res) => {
     }
 
     const user = results[0];
-    if (!user.is_approved) {
-      return res.status(403).json({ msg: "Your account is not approved yet." });
-    }
 
     // Compare provided password with the hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);

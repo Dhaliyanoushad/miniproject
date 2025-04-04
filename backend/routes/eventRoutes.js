@@ -33,7 +33,7 @@ router.get("/", (req, res) => {
       // Group guests by event_id
       const eventMap = events.map((event) => ({
         ...event,
-        pending_guests: pendingGuests
+        registered_guests: pendingGuests
           .filter((guest) => guest.event_id === event.event_id)
           .map((guest) => ({
             id: guest.id,
@@ -147,6 +147,43 @@ router.post("/bookticket", verifyToken, (req, res) => {
       return res.status(500).json({ msg: "Database error" });
     }
     res.status(200).json({ msg: "Ticket booked successfully" });
+  });
+});
+
+router.delete("/cancelbooking", verifyToken, (req, res) => {
+  const db = req.app.locals.db;
+  const { guest_id, event_id } = req.body;
+
+  if (!guest_id || !event_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: guest_id and event_id are required",
+    });
+  }
+
+  console.log("Attempting to cancel booking:", { guest_id, event_id });
+
+  // Delete the booking if it exists
+  const deleteSql =
+    "DELETE FROM eventapproval WHERE guest_id = ? AND event_id = ?";
+
+  db.query(deleteSql, [guest_id, event_id], (deleteErr, deleteResults) => {
+    if (deleteErr) {
+      console.error("Error cancelling booking:", deleteErr);
+      return res.status(500).json({
+        success: false,
+        message: "Error cancelling booking",
+        error: deleteErr.message,
+      });
+    }
+
+    // Optionally update the event's available slots
+    // This would be another query to update the events table if needed
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking cancelled successfully",
+    });
   });
 });
 
@@ -371,6 +408,30 @@ router.get("/eventbookings/:guestid", (req, res) => {
 
     console.log(`Event Bookings for Guest ID ${guestId}:`, results);
     res.json(results);
+  });
+});
+
+router.delete("/:event_id", verifyToken, (req, res) => {
+  const db = req.app.locals.db;
+  const { event_id } = req.params; // Get event ID from URL
+
+  if (!event_id) {
+    return res.status(400).json({ message: "Event ID is required" });
+  }
+
+  const sql = "DELETE FROM events WHERE event_id = ?";
+
+  db.query(sql, [event_id], (err, result) => {
+    if (err) {
+      console.error("Error deleting event:", err);
+      return res.status(500).json({ message: "Failed to delete event" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.json({ message: "Event deleted successfully" });
   });
 });
 

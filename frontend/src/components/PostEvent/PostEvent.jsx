@@ -145,14 +145,15 @@ const PostEvent = () => {
             required
           >
             <option value="">Select Event Category</option>
-            <option value="Music">Music</option>
-            <option value="Business">Business</option>
-            <option value="Technology">Technology</option>
-            <option value="Arts">Arts & Culture</option>
-            <option value="Nightlife">Nightlife</option>
-            <option value="Dining">Dining Experiences</option>
-            <option value="Networking">Networking</option>
-            <option value="Fashion">Fashion & Style</option>
+            <option value="Workshops">Workshops</option>
+            <option value="Seminars">Seminars</option>
+            <option value="Hackathons">Hackathons</option>
+            <option value="Cultural">Cultural Festivals</option>
+            <option value="Sports">Sports & Games</option>
+            <option value="Technical">Technical Events</option>
+            <option value="Fests">College Fests</option>
+            <option value="Debates">Debates & Discussions</option>
+            <option value="Career">Career & Networking</option>
           </select>
           {/* Image Upload */}
           {/* <div className="event-file-group">

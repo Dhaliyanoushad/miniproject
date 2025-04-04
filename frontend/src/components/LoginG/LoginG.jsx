@@ -61,7 +61,6 @@ const LoginG = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-
           {/* Password Input with Eye Icon */}
           <div className="relative w-full">
             <input
@@ -79,24 +78,11 @@ const LoginG = () => {
             </span>
           </div>
 
-          {/* Remember Me & Forgot Password */}
-          <div className="lg-auth__form-group">
-            <label className="lg-auth__checkbox">
-              <input type="checkbox" className="lg-auth__checkbox-input" />
-              Remember me
-            </label>
-            {/* <a href="#" className="lg-auth__forgot-password">
-              Forgot password?
-            </a> */}
-          </div>
-
           {/* Login Button */}
           <button type="submit" className="lg-auth__btn lg-auth__btn--primary">
             Log In
           </button>
-
           {error && <div className="lg-auth__error">{error}</div>}
-
           {/* Sign Up Option */}
           <p className="lg-auth__signup-text">
             Don't have an account?{" "}
