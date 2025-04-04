@@ -91,6 +91,8 @@ const HostD = () => {
   };
 
   const handleHomeClick = () => {
+    localStorage.removeItem("host");
+    localStorage.removeItem("token");
     navigate("/");
   };
 
@@ -216,6 +218,14 @@ const HostD = () => {
               event.registered_guests?.filter(
                 (guest) => guest.booking_status === "Pending"
               ) || [];
+            const approvedGuests =
+              event.registered_guests?.filter(
+                (guest) => guest.booking_status === "Confirm"
+              ) || [];
+            const rejectedGuests =
+              event.registered_guests?.filter(
+                (guest) => guest.booking_status === "Reject"
+              ) || [];
 
             return (
               <div
@@ -225,8 +235,15 @@ const HostD = () => {
                 {/* Event Details */}
                 <div className="mb-2">
                   <h3 className="text-lg font-bold">{event.title}</h3>
-                  <p className="text-gray-300">📅 {event.date}</p>
-                  <p className="text-gray-300">📍 {event.location}</p>
+                  <p className="text-gray-300">
+                    📅{" "}
+                    {new Date(event.event_date).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                  <p className="text-gray-300">📍 {event.venue}</p>
                 </div>
 
                 {/* Action Buttons */}
@@ -298,6 +315,27 @@ const HostD = () => {
                         </div>
                       ))}
                     </div>
+                  )}
+                </div>
+
+                {/* Approved Guests Section */}
+                <div className="mt-3">
+                  <h4 className="font-medium border-b border-white/20 pb-1 mb-2">
+                    Approved Guests{" "}
+                    {approvedGuests.length > 0 && `(${approvedGuests.length})`}
+                  </h4>
+                  {approvedGuests.length === 0 ? (
+                    <p className="text-gray-400 text-sm p-2">
+                      No approved guests
+                    </p>
+                  ) : (
+                    <ul className="list-disc pl-5 space-y-1">
+                      {approvedGuests.map((guest) => (
+                        <li key={guest.guest_id} className="text-sm">
+                          {guest.name}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               </div>
