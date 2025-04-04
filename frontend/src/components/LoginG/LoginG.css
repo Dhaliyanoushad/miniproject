@@ -7,9 +7,9 @@
   background: #040405; /* Black */
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
-.lg-auth > * {
+/* .lg-auth > * {
   margin-top: 100px;
-}
+} */
 
 .lg-auth__error {
   color: #ff4d4d; /* Red color for errors */

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye <icons></icons>
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const SignUpG = () => {
   const navigate = useNavigate();
@@ -52,7 +53,19 @@ const SignUpG = () => {
   };
 
   return (
-    <div className="flex w-full h-screen bg-[#040405] shadow-lg">
+    <div className="flex w-full h-screen bg-[#040405] shadow-lg relative">
+      <div className="flex justify-between w-full p-8 absolute top-0 left-0 z-10">
+        <Link to="/">
+          <button className="bg-gradient-to-r from-[#6A5F7E] to-[#4C3F5E] text-white px-6 py-2 rounded-full hover:from-[#7A6F8E] hover:to-[#5B4F6F] shadow-md transition-all duration-300">
+            ← Go Back
+          </button>
+        </Link>
+        <Link to="/register">
+          <button className="bg-gradient-to-r from-[#8A7F9E] to-[#6C5F8B] text-white px-6 py-2 rounded-full hover:from-[#9A8FB2] hover:to-[#7C6F9B] shadow-md transition-all duration-300">
+            Register →
+          </button>
+        </Link>
+      </div>
       {/* Left Side */}
       <div
         className="flex-1 bg-cover bg-center text-white p-10"
