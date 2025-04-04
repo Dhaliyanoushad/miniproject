@@ -1,139 +1,108 @@
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-
-const events = [
-  {
-    id: 1,
-    title: "Tech Conference 2025",
-    description: "A global summit on emerging technologies and AI.",
-    date: "April 15, 2025",
-    time: "10:00 AM",
-    location: "Silicon Valley Convention Center",
-    category: "Technology",
-    image:
-      "https://i.pinimg.com/736x/9f/78/c1/9f78c1a6f1d3faf3981f2e0dbee443b5.jpg",
-    hostname: "John Doe",
-  },
-  {
-    id: 2,
-    title: "AI & Innovation Summit",
-    description: "Exploring the future of artificial intelligence.",
-    date: "June 10, 2025",
-    time: "2:30 PM",
-    location: "New York Tech Hub",
-    category: "Technology",
-    image:
-      "https://i.pinimg.com/736x/29/e5/a0/29e5a017f0889357c537427045881dfa.jpg",
-    hostname: "Jane Smith",
-  },
-  {
-    id: 3,
-    title: "Startup Pitch Night",
-    description: "An evening of exciting startup pitches and networking.",
-    date: "May 20, 2025",
-    time: "6:00 PM",
-    location: "Downtown Incubator",
-    category: "Business",
-    image:
-      "https://i.pinimg.com/736x/68/54/43/685443c0168901fd06c71708a2a105af.jpg",
-    hostname: "Michael Lee",
-  },
-  {
-    id: 4,
-    title: "Live Jazz Night",
-    description: "Experience a night of mesmerizing jazz music.",
-    date: "July 5, 2025",
-    time: "8:00 PM",
-    location: "Blue Note Club",
-    category: "Music",
-    image:
-      "https://i.pinimg.com/736x/b0/0c/1f/b00c1f37e0710a9d64b626f2d523a397.jpg",
-    hostname: "Sophia Davis",
-  },
-  {
-    id: 5,
-    title: "Art & Culture Exhibition",
-    description: "A showcase of contemporary and traditional artwork.",
-    date: "August 12, 2025",
-    time: "11:00 AM",
-    location: "City Art Gallery",
-    category: "Arts",
-    image:
-      "https://i.pinimg.com/736x/b6/18/11/b6181147f14cbf318253d7e31db659a8.jpg",
-    hostname: "Liam Martinez",
-  },
-];
+import axios from "axios";
 
 const EventDetails = () => {
-  const { id } = useParams();
-  const event = events.find((e) => e.id === parseInt(id));
+  const { eventId } = useParams();
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  if (!event) {
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/events/${eventId}`
+        );
+        console.log("Event Details Response:", response.data); // Log the entire response
+
+        setEvent(response.data.event); // Accessing event object inside response
+      } catch (err) {
+        setError("Event not found or an error occurred.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [eventId]);
+
+  if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#0A0618] text-white">
-        <h1 className="text-2xl font-semibold">Event not found</h1>
-      </div>
+      <p className="text-center text-white mt-10">Loading event details...</p>
     );
   }
 
+  if (error) {
+    return <p className="text-center text-red-500 mt-10">{error}</p>;
+  }
+
+  const placeholderImages = [
+    "https://i.pinimg.com/736x/8a/d6/e9/8ad6e94478f3ebcbf731120649caf438.jpg",
+    "https://i.pinimg.com/474x/83/00/28/8300288db359ebb374a1a540b2a59e43.jpg",
+    "https://i.pinimg.com/736x/b6/a6/f0/b6a6f0a026658fb980c59e222d227b3c.jpg",
+    "https://i.pinimg.com/474x/e3/32/17/e332171e9246ca5e0c38cc424a392310.jpg",
+    "https://i.pinimg.com/736x/4e/f3/87/4ef387171d07be5516198c780b84e124.jpg",
+  ];
+
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A0618] via-[#1C1C2E] to-[#2A2438] text-white p-6 pt-24">
-      <div className="max-w-4xl w-full bg-[#1C1C2E] bg-opacity-90 backdrop-blur-md shadow-xl rounded-xl overflow-hidden border border-[#4A0072]">
+    <section className="bg-[#0A0618] text-white py-12 px-6 min-h-screen">
+      <div className="max-w-4xl mx-auto bg-[#1C1C2E] p-6 rounded-lg shadow-lg">
+        {/* Event Image */}
         <img
-          src={event.image}
+          src={
+            event.image_url ||
+            placeholderImages[
+              Math.floor(Math.random() * placeholderImages.length)
+            ]
+          }
           alt={event.title}
-          className="w-full h-80 object-cover rounded-t-xl"
+          className="w-full h-60 object-cover rounded-md"
         />
 
-        <div className="p-8">
-          <h1 className="text-4xl font-semibold text-[#8A7F9E]">
-            {event.title}
-          </h1>
-          <p className="text-lg text-gray-300 mt-4">{event.description}</p>
+        {/* Event Title */}
+        <h2 className="text-3xl font-bold text-[#c09cdf] mt-4">
+          {event.title}
+        </h2>
 
-          <div className="mt-6 space-y-3 text-lg">
-            <p>
-              <span className="text-[#6A5F7E] font-medium">Date:</span>{" "}
-              {event.date}
-            </p>
-            <p>
-              <span className="text-[#6A5F7E] font-medium">Time:</span>{" "}
-              {event.time}
-            </p>
-            <p>
-              <span className="text-[#6A5F7E] font-medium">Location:</span>{" "}
-              {event.location}
-            </p>
-            <p>
-              <span className="text-[#6A5F7E] font-medium">Category:</span>{" "}
-              {event.category}
-            </p>
-            <p>
-              <span className="text-[#6A5F7E] font-medium">Host:</span>{" "}
-              {event.hostname}
-            </p>
-          </div>
+        {/* Event Description */}
+        <p className="text-gray-400 text-lg mt-2">{event.description}</p>
 
-          <div className="mt-8 flex gap-4">
-            <Link
-              to="/loginguest"
-              className="bg-gradient-to-r from-[#4A0072] to-[#6A5F7E] text-white font-medium px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
-            >
-              Book Ticket
-            </Link>
+        {/* Event Details */}
+        <p className="text-gray-400 mt-2">
+          <strong>Date:</strong>{" "}
+          {new Date(event.event_date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+        <p className="text-gray-400 mt-2">
+          <strong>Time:</strong> {event.event_time}
+        </p>
+        <p className="text-gray-400 mt-2">
+          <strong>Venue:</strong> {event.venue}
+        </p>
+        <p className="text-gray-400 mt-2">
+          <strong>Category:</strong> {event.category}
+        </p>
+        <p className="text-gray-400 mt-2">
+          <strong>Participants Limit:</strong> {event.participants_limit}
+        </p>
 
-            <Link
-              to="/events"
-              className="border border-[#6A5F7E] text-[#6A5F7E] px-6 py-3 rounded-lg hover:bg-[#6A5F7E] hover:text-white transition-transform transform hover:scale-105"
-            >
-              Back to Events
-            </Link>
-            <Link
-              to="/"
-              className="border border-[#6A5F7E] text-[#6A5F7E] px-6 py-3 rounded-lg hover:bg-[#6A5F7E] hover:text-white transition-transform transform hover:scale-105"
-            >
-              Back to Home
-            </Link>
-          </div>
+        {/* Book Now Button */}
+        <a
+          href={"/loginguest"}
+          className="mt-4 inline-block bg-[#ceb8db] hover:bg-[#815c9c] text-[#1C1C2E] px-6 py-3 rounded-md text-lg font-medium transition"
+        >
+          Book Now
+        </a>
+
+        {/* Back to Events Link */}
+        <div className="mt-6">
+          <Link to="/events" className="text-[#c09cdf] hover:underline text-lg">
+            ← Back to Events
+          </Link>
         </div>
       </div>
     </section>

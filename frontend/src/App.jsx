@@ -44,9 +44,9 @@ const Preloader = () => {
       </div>
 
       <h2 className="text-white text-3xl font-bold tracking-wider animate-pulse duration-1000">
-        <span className="text-[#351d80]">D</span>
-        <span className="text-white">oo</span>
-        <span className="text-[#5c1d80]">ls</span>
+        <span className="text-[#7856dd]">Ef</span>
+        <span className="text-white">fo</span>
+        <span className="text-[#5c1d80]">rst</span>
       </h2>
 
       <p className="text-white text-sm mt-4 opacity-80 tracking-widest font-light">

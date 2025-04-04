@@ -6,7 +6,6 @@ import Footer from "../components/Footer/Footer";
 const Events = () => {
   return (
     <>
-      <Navbar />
       <EventShowcase />
       <Footer />
     </>

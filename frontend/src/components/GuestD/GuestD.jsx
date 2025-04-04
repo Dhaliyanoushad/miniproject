@@ -190,6 +190,12 @@ const GuestD = () => {
     navigate("/loginguest");
   };
 
+  const filteredUpcomingEvents = searchQuery
+    ? upcomingEvents.filter((event) =>
+        event.category.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : upcomingEvents;
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-[#261646] to-[#13001E] text-white">
       {/* Sidebar */}
@@ -358,11 +364,7 @@ const GuestD = () => {
                             : "bg-red-500 text-white"
                         }`}
                       >
-                        {event.booking_status === "Confirm"
-                          ? "Confirmed"
-                          : event.booking_status === "Pending"
-                          ? "Pending"
-                          : "Cancelled"}
+                        {event.booking_status}
                       </span>
                     </div>
                     <div className="mt-4 space-y-2">
@@ -391,16 +393,25 @@ const GuestD = () => {
                 ))}
               </div>
             )
-          ) : upcomingEvents.length === 0 ? (
+          ) : filteredUpcomingEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-xl text-gray-400">No matching events found.</p>
-              <p className="text-gray-300 mt-2">
-                Try adjusting your search criteria.
+              <p className="text-xl text-gray-400">
+                {searchQuery
+                  ? `No events found in "${searchQuery}" category`
+                  : "No events available"}
               </p>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="mt-4 text-pink-300 hover:text-pink-200"
+                >
+                  Clear filter
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event, index) => (
+              {filteredUpcomingEvents.map((event, index) => (
                 <div
                   key={`upcoming-event-${index}`}
                   className="group relative p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm overflow-hidden"

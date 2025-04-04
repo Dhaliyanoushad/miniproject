@@ -3,6 +3,7 @@ import "./LoginG.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const LoginG = () => {
   const navigate = useNavigate();
@@ -44,6 +45,18 @@ const LoginG = () => {
 
   return (
     <div className="lg-auth">
+      <div className="flex justify-between mb-6">
+        <Link to="/">
+          <button className="bg-[#6A5F7E] text-white px-6 py-2 rounded-full hover:bg-[#7A6F8E] transition-all">
+            Go Back
+          </button>
+        </Link>
+        <Link to="/register">
+          <button className="bg-[#8A7F9E] text-white px-6 py-2 rounded-full hover:bg-[#9A8FB2] transition-all">
+            Register
+          </button>
+        </Link>
+      </div>
       {/* Left Side: Background Image */}
       <div className="lg-auth__left"></div>
 

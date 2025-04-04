@@ -6,7 +6,6 @@ import Navbar from "../components/Navbar/Navbar";
 const EventDetails = () => {
   return (
     <>
-      <Navbar />
       <EventDetail />
       <Footer />
     </>

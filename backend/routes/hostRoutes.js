@@ -54,6 +54,20 @@ router.delete("/", async (req, res) => {
     res.status(500).json({ message: "Failed to delete host" });
   }
 });
+router.get("/totalhosts", (req, res) => {
+  const db = req.app.locals.db;
+
+  const sql = "SELECT COUNT(*) AS total_hosts FROM hosts";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching total hosts:", err);
+      return res.status(500).json({ msg: "Error fetching total hosts." });
+    }
+
+    res.json({ total_hosts: results[0].total_hosts });
+  });
+});
 
 router.get("/events", (req, res) => {
   const db = req.app.locals.db;

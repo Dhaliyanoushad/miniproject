@@ -187,6 +187,25 @@ router.delete("/cancelbooking", verifyToken, (req, res) => {
   });
 });
 
+router.get("/totaltickets", (req, res) => {
+  const db = req.app.locals.db;
+
+  const sql = `
+    SELECT COUNT(*) AS total_registered_guests FROM eventapproval
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching total registered guests:", err);
+      return res
+        .status(500)
+        .json({ msg: "Error fetching total registered guests." });
+    }
+
+    res.json({ tickets_sold: results[0].total_registered_guests });
+  });
+});
+
 // Update an event (protected)
 router.put("/:event_id", verifyToken, (req, res) => {
   const db = req.app.locals.db;

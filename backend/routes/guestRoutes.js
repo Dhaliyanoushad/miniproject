@@ -17,6 +17,28 @@ router.get("/", (req, res) => {
   });
 });
 
+// Guest dashboard route (protected)
+router.get("/dashboard", verifyToken, (req, res) => {
+  res
+    .status(200)
+    .json({ msg: "Welcome to the Guest Dashboard", user: req.user });
+});
+
+router.get("/totalguests", (req, res) => {
+  const db = req.app.locals.db;
+
+  const sql = "SELECT COUNT(*) AS total_guests FROM guests";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching total guests:", err);
+      return res.status(500).json({ msg: "Error fetching total guests." });
+    }
+
+    res.json({ total_guests: results[0].total_guests });
+  });
+});
+
 // Get guest by ID
 router.get("/:id", (req, res) => {
   const db = req.app.locals.db;
@@ -43,12 +65,4 @@ router.get("/:id", (req, res) => {
     res.json(results[0]);
   });
 });
-
-// Guest dashboard route (protected)
-router.get("/dashboard", verifyToken, (req, res) => {
-  res
-    .status(200)
-    .json({ msg: "Welcome to the Guest Dashboard", user: req.user });
-});
-
 module.exports = router;

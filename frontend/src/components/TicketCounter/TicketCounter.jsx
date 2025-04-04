@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CountUp from "react-countup";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const TicketCounter = () => {
   const [data, setData] = useState({
@@ -8,22 +9,25 @@ const TicketCounter = () => {
     participants: 0,
     hosts: 0,
   });
-
   useEffect(() => {
-    // Fetch data from your backend API
     const fetchData = async () => {
       try {
-        const response = await fetch("YOUR_API_ENDPOINT"); // Replace with your API URL
-        const result = await response.json();
+        const [hostsRes, guestsRes, ticketsRes] = await Promise.all([
+          axios.get("http://localhost:8000/api/hosts/totalhosts"),
+          axios.get("http://localhost:8000/api/guests/totalguests"),
+          axios.get("http://localhost:8000/api/events/totaltickets"),
+        ]);
+
         setData({
-          ticketsSold: result.ticketsSold,
-          participants: result.participants,
-          hosts: result.hosts,
+          hosts: hostsRes.data.total_hosts,
+          participants: guestsRes.data.total_guests,
+          ticketsSold: ticketsRes.data.tickets_sold,
         });
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
+
     fetchData();
   }, []);
 

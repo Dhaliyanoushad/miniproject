@@ -5,7 +5,6 @@ import Navbar from "../components/Navbar/Navbar";
 const LoginHost = () => {
   return (
     <>
-      <Navbar />
       <LoginH />
     </>
   );
