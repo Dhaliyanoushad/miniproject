@@ -5,103 +5,177 @@ import axios from "axios";
 const HostD = () => {
   const navigate = useNavigate();
   const [hostData, setHostData] = useState({
-    fullname: "",
-    email: "",
+    fullName: "",
+    profileImage: "",
     department: "",
-    phone_number: "",
+    eventsHosted: 0,
     joinedDate: "",
-    image:
-      "https://i.pinimg.com/736x/d6/f8/7c/d6f87ca07ddc580a72ab4314ff238cba.jpg",
   });
 
   const [events, setEvents] = useState([]);
   const [expandedEventId, setExpandedEventId] = useState(null);
   const [showRequestsForEvent, setShowRequestsForEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    upcomingEvents: 0,
+    pastEvents: 0,
+    totalGuests: 0,
+    pendingRequests: 0,
+  });
 
   useEffect(() => {
-    // Fetch host data and events
+    // Fetch host profile data
     const fetchHostData = async () => {
       try {
         setLoading(true);
-
-        // For demo, use a fixed hostId since we're removing authentication
-        const hostId = 1; // Using a placeholder ID
-
-        // Fetch host details using axios
-        const hostResponse = await axios.get(
-          `http://localhost:5000/hosts/${hostId}`
+        // Updated endpoint to match the controller with axios
+        const response = await axios.get(
+          "http://localhost:5000/hosts/current",
+          {
+            withCredentials: true, // Include cookies for auth (axios equivalent to credentials: "include")
+          }
         );
-        const hostData = hostResponse.data;
 
-        // Calculate joined date
-        const joinedDate = new Date().toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-        });
-
+        const data = response.data;
         setHostData({
-          ...hostData,
-          joinedDate,
-          image:
+          fullName: data.fullName,
+          profileImage:
+            data.profileImage ||
             "https://i.pinimg.com/736x/d6/f8/7c/d6f87ca07ddc580a72ab4314ff238cba.jpg",
+          department: data.department,
+          eventsHosted: data.events ? data.events.length : 0,
+          joinedDate: new Date(data.createdAt || Date.now()).toLocaleDateString(
+            "en-US",
+            { year: "numeric", month: "long" }
+          ),
         });
-
-        // Fetch host's events using axios
-        const eventsResponse = await axios.get("http://localhost:5000/events");
-        const eventsData = eventsResponse.data;
-
-        // Filter events for this host and format them
-        const hostEvents = eventsData
-          .filter((event) => event.host_id === hostId)
-          .map((event) => ({
-            id: event.event_id,
-            title: event.title,
-            date: new Date(event.event_date).toISOString().split("T")[0],
-            time: event.event_time,
-            venue: event.venue,
-            description: event.description,
-            category: event.category,
-            capacity: event.capacity,
-            guests: [], // Sample data will be filled in below
-            guestRequests: [], // Sample data will be filled in below
-          }));
-
-        // For now, we'll use sample data for guests and requests
-        for (const event of hostEvents) {
-          event.guests = ["Guest 1", "Guest 2"];
-          event.guestRequests = ["Pending 1", "Pending 2"];
-        }
-
-        setEvents(hostEvents);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching host data:", error);
+        // Handle 401 errors for authentication issues
+        if (error.response && error.response.status === 401) {
+          navigate("/loginhost");
+          return;
+        }
+        setError("Failed to load profile data. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
+    // Fetch host events with updated schema fields
+    const fetchEvents = async (hostId) => {
+      try {
+        setLoading(true);
+        // Updated endpoint to match the controller with axios
+        const response = await axios.get(`http://localhost:5000/events`, {
+          withCredentials: true, // Include cookies for auth
+        });
+        console.log(hostId);
+        const data = response.data;
+
+        // Transform API data to match component state structure based on new schema
+        const formattedEvents = data.map((event) => ({
+          id: event._id,
+          name: event.title, // Changed from name to title
+          date: event.date,
+          time: event.time,
+          venue: event.venue,
+          category: event.category,
+          capacity: event.capacity,
+          description: event.description,
+          status: event.status,
+          // Changed from guests to registeredAttendees
+          guests: event.registeredAttendees
+            ? event.registeredAttendees.map(
+                (attendee) => attendee.name || attendee.fullName
+              )
+            : [],
+          // Assuming guestRequests field may not exist in new schema
+          // May need to add a different API endpoint for pending requests
+          guestRequests: event.pendingRequests
+            ? event.pendingRequests.map(
+                (request) => request.name || request.fullName
+              )
+            : [],
+          attendeeCount: event.attendeeCount || 0,
+        }));
+
+        setEvents(formattedEvents);
+
+        // Calculate statistics with updated schema fields
+        let pendingRequests = 0;
+        let totalGuests = 0;
+        let upcomingEvents = 0;
+        let pastEvents = 0;
+
+        data.forEach((event) => {
+          if (event.pendingRequests)
+            pendingRequests += event.pendingRequests.length;
+          if (event.registeredAttendees)
+            totalGuests += event.registeredAttendees.length;
+
+          // Use status field instead of date comparison
+          if (event.status === "upcoming") {
+            upcomingEvents++;
+          } else if (
+            event.status === "completed" ||
+            event.status === "cancelled"
+          ) {
+            pastEvents++;
+          }
+        });
+
+        setStats({
+          totalEvents: data.length,
+          upcomingEvents,
+          pastEvents,
+          totalGuests,
+          pendingRequests,
+        });
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        setError("Failed to load events. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Run all fetch operations
     fetchHostData();
+    fetchEvents();
   }, [navigate]);
 
   const handleCreateEvent = () => {
     navigate("/newevent");
   };
 
-  const handleEditEvent = (id) => {
-    navigate(`/editevent/${id}`);
+  const handleEditEvent = (eventId) => {
+    navigate(`/editevent/${eventId}`);
   };
 
   const handleDeleteEvent = async (eventId) => {
-    try {
-      await axios.delete(`http://localhost:5000/events/${eventId}`);
+    if (!window.confirm("Are you sure you want to delete this event?")) {
+      return;
+    }
 
-      // Remove event from state
-      setEvents((prevEvents) =>
-        prevEvents.filter((event) => event.id !== eventId)
-      );
+    try {
+      await axios.delete(`/events/${eventId}`, {
+        withCredentials: true, // Equivalent to credentials: "include"
+      });
+
+      // Remove the event from state
+      setEvents(events.filter((event) => event.id !== eventId));
+
+      // Update stats
+      setStats((prevStats) => ({
+        ...prevStats,
+        totalEvents: prevStats.totalEvents - 1,
+      }));
     } catch (error) {
       console.error("Error deleting event:", error);
+      alert("Failed to delete event. Please try again.");
     }
   };
 
@@ -117,47 +191,174 @@ const HostD = () => {
     navigate("/");
   };
 
-  const handleLogout = () => {
-    navigate("/loginhost");
-  };
-
-  const handleViewRequests = (eventId) => {
-    setShowRequestsForEvent(showRequestsForEvent === eventId ? null : eventId);
-    // Close guest list view if open for this event
-    if (expandedEventId === eventId) {
-      setExpandedEventId(null);
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint
+      await axios.post(
+        "http://localhost:5000/hosts/logout",
+        {},
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      // Navigate to login page regardless of success/failure
+      navigate("/loginhost");
     }
   };
 
-  const handleGuestRequest = async (eventId, guestName, action) => {
+  const handleViewRequests = async (eventId) => {
+    // Toggle request view
+    if (showRequestsForEvent === eventId) {
+      setShowRequestsForEvent(null);
+      return;
+    }
+
+    // Fetch requests for this specific event
     try {
-      // Update local state directly since we're not using authentication
-      setEvents((prevEvents) => {
-        return prevEvents.map((event) => {
+      // Updated endpoint to fetch pending requests for an event
+      const response = await fetch(
+        `http://localhost:5000/hosts/events/${eventId}/requests`,
+        {
+          credentials: "include", // Include cookies for auth
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch requests: ${response.statusText}`);
+      }
+
+      const requestsData = await response.json();
+
+      // Update the events state with the fetched requests
+      setEvents((prevEvents) =>
+        prevEvents.map((event) => {
           if (event.id === eventId) {
-            const updatedEvent = { ...event };
-            updatedEvent.guestRequests = event.guestRequests.filter(
-              (request) => request !== guestName
-            );
-
-            if (action === "accept") {
-              updatedEvent.guests = [...event.guests, guestName];
-            }
-
-            return updatedEvent;
+            return {
+              ...event,
+              guestRequests: requestsData.map(
+                (req) => req.user?.name || req.user?.fullName || "Guest"
+              ),
+            };
           }
           return event;
-        });
-      });
+        })
+      );
+
+      // Show the requests section
+      setShowRequestsForEvent(eventId);
+
+      // Close guest list view if open for this event
+      if (expandedEventId === eventId) {
+        setExpandedEventId(null);
+      }
     } catch (error) {
-      console.error("Error updating guest status:", error);
+      console.error("Error fetching requests:", error);
+      alert("Failed to load guest requests. Please try again.");
     }
   };
 
-  if (loading) {
+  const handleGuestRequest = async (eventId, requestId, action) => {
+    try {
+      // Updated to match the controller API
+      const response = await fetch(
+        `http://localhost:5000/hosts/requests/${requestId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Include cookies for auth
+          body: JSON.stringify({ action }), // 'accept' or 'reject'
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to handle guest request: ${response.statusText}`
+        );
+      }
+
+      // Refresh the event requests after handling the request
+      const updatedRequestsResponse = await fetch(
+        `/hosts/events/${eventId}/requests`,
+        {
+          credentials: "include", // Include cookies for auth
+        }
+      );
+
+      if (!updatedRequestsResponse.ok) {
+        throw new Error(
+          `Failed to refresh requests: ${updatedRequestsResponse.statusText}`
+        );
+      }
+
+      const updatedRequestsData = await updatedRequestsResponse.json();
+
+      // Update the events state with the refreshed requests and attendee count
+      setEvents((prevEvents) =>
+        prevEvents.map((event) => {
+          if (event.id === eventId) {
+            return {
+              ...event,
+              guestRequests: updatedRequestsData.map(
+                (req) => req.user?.name || req.user?.fullName || "Guest"
+              ),
+              // If action was accept, also update the attendee count
+              attendeeCount:
+                action === "accept"
+                  ? event.attendeeCount + 1
+                  : event.attendeeCount,
+              // If action was accept, also add the guest to the guest list
+              guests:
+                action === "accept"
+                  ? [...event.guests, requestId]
+                  : event.guests,
+            };
+          }
+          return event;
+        })
+      );
+
+      // Update stats
+      if (action === "accept") {
+        setStats((prevStats) => ({
+          ...prevStats,
+          totalGuests: prevStats.totalGuests + 1,
+          pendingRequests: prevStats.pendingRequests - 1,
+        }));
+      } else {
+        setStats((prevStats) => ({
+          ...prevStats,
+          pendingRequests: prevStats.pendingRequests - 1,
+        }));
+      }
+    } catch (error) {
+      console.error("Error handling guest request:", error);
+      alert(`Failed to ${action} guest request. Please try again.`);
+    }
+  };
+
+  if (loading && !hostData.fullName) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#261646] to-[#13001E] text-white">
-        <div className="text-xl">Loading...</div>
+        <div className="animate-pulse text-2xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error && !hostData.fullName) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#261646] to-[#13001E] text-white">
+        <div className="text-red-400 text-xl max-w-md text-center p-6 bg-white/10 rounded-lg">
+          {error}
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-[#7A3B69]/60 text-white px-4 py-2 rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -173,14 +374,14 @@ const HostD = () => {
       </button>
 
       <div className="max-w-4xl mx-auto">
-        {/* Host Profile Section */}
+        {/* Enhanced Host Profile Section */}
         <div className="mb-12 p-8 rounded-2xl bg-gradient-to-r from-[#7A3B69]/80 to-[#563440]/80 backdrop-blur-lg border border-white/20 shadow-2xl transform hover:scale-[1.01] transition-all duration-500">
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Profile Image with Glow Effect */}
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-pink-500/30 blur-xl animate-pulse"></div>
               <img
-                src={hostData.image}
+                src={hostData.profileImage}
                 alt="Host profile"
                 className="relative w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-[#7A3B69] object-cover shadow-lg"
               />
@@ -190,7 +391,7 @@ const HostD = () => {
             <div className="flex-1 text-center md:text-left">
               <p className="text-pink-200 mb-1">Welcome back,</p>
               <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">
-                {hostData.fullname}
+                {hostData.fullName}
               </h2>
               <p className="text-gray-300 mt-1">{hostData.department}</p>
 
@@ -198,16 +399,13 @@ const HostD = () => {
               <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
                 <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md">
                   <span className="text-pink-200 font-medium">
-                    {events.length}
+                    {stats.totalEvents}
                   </span>{" "}
-                  Current Events
+                  Total Events
                 </div>
                 <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md">
                   <span className="text-pink-200 font-medium">
-                    {events.reduce(
-                      (total, event) => total + event.guests.length,
-                      0
-                    )}
+                    {stats.totalGuests}
                   </span>{" "}
                   Total Guests
                 </div>
@@ -235,6 +433,28 @@ const HostD = () => {
           Your Event Dashboard
         </h1>
 
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 backdrop-blur-lg p-4 rounded-xl text-center">
+            <p className="text-gray-300">Upcoming Events</p>
+            <p className="text-2xl font-bold text-pink-200">
+              {stats.upcomingEvents}
+            </p>
+          </div>
+          <div className="bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 backdrop-blur-lg p-4 rounded-xl text-center">
+            <p className="text-gray-300">Past Events</p>
+            <p className="text-2xl font-bold text-pink-200">
+              {stats.pastEvents}
+            </p>
+          </div>
+          <div className="bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 backdrop-blur-lg p-4 rounded-xl text-center">
+            <p className="text-gray-300">Pending Requests</p>
+            <p className="text-2xl font-bold text-pink-200">
+              {stats.pendingRequests}
+            </p>
+          </div>
+        </div>
+
         {/* Create Event Button */}
         <div className="text-center mb-6">
           <button
@@ -250,7 +470,12 @@ const HostD = () => {
           <h2 className="text-2xl font-semibold mb-4">Your Events</h2>
 
           {events.length === 0 ? (
-            <p className="text-gray-400 text-center">No events created yet.</p>
+            <div className="p-6 rounded-xl bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 backdrop-blur-lg text-center">
+              <p className="text-gray-400">No events created yet.</p>
+              <p className="text-gray-400 mt-2">
+                Click the "Create Event" button above to get started!
+              </p>
+            </div>
           ) : (
             <ul className="space-y-6">
               {events.map((event) => (
@@ -260,9 +485,24 @@ const HostD = () => {
                 >
                   {/* Event Title */}
                   <h3 className="text-xl font-bold">{event.name}</h3>
-                  <p className="text-gray-300 mt-1">📅 {event.date}</p>
+                  <div className="flex flex-wrap gap-2 my-2">
+                    <span className="bg-[#7A3B69]/40 text-xs px-2 py-1 rounded-full">
+                      {event.category}
+                    </span>
+                    <span className="bg-[#7A3B69]/40 text-xs px-2 py-1 rounded-full">
+                      Status: {event.status}
+                    </span>
+                  </div>
                   <p className="text-gray-300 mt-1">
-                    👥 Guests: {event.guests.length}
+                    📅 {new Date(event.date).toLocaleDateString()} at{" "}
+                    {new Date(event.time).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                  <p className="text-gray-300 mt-1">📍 {event.venue}</p>
+                  <p className="text-gray-300 mt-1">
+                    👥 Attendees: {event.attendeeCount}/{event.capacity}
                   </p>
 
                   {/* Guest Request Badge */}
@@ -277,9 +517,13 @@ const HostD = () => {
                   {/* Expanded Event Details */}
                   {expandedEventId === event.id && (
                     <div className="mt-4 p-4 rounded-lg bg-white/10 border border-white/20">
-                      <h4 className="font-medium text-lg mb-2">Guest List:</h4>
+                      <h4 className="font-medium text-lg mb-2">
+                        Attendee List:
+                      </h4>
                       {event.guests.length === 0 ? (
-                        <p className="text-gray-300">No guests yet</p>
+                        <p className="text-gray-300">
+                          No attendees have registered for this event yet.
+                        </p>
                       ) : (
                         <ul className="list-disc pl-5">
                           {event.guests.map((guest, index) => (
@@ -296,7 +540,7 @@ const HostD = () => {
                   {showRequestsForEvent === event.id && (
                     <div className="mt-4 p-4 rounded-lg bg-white/10 border border-white/20">
                       <h4 className="font-medium text-lg mb-2">
-                        Guest Requests:
+                        Registration Requests:
                       </h4>
                       {event.guestRequests.length === 0 ? (
                         <p className="text-gray-300">No pending requests</p>
@@ -348,11 +592,11 @@ const HostD = () => {
                       className="bg-[#866A9A]/40 text-white px-3 py-2 rounded-lg shadow-md backdrop-blur-md transition-all duration-300 hover:bg-[#866A9A]/60 hover:scale-105"
                     >
                       {expandedEventId === event.id
-                        ? "Hide Guests"
-                        : "View Guest List"}
+                        ? "Hide Attendees"
+                        : "View Attendees"}
                     </button>
 
-                    {/* New Button for Guest Requests */}
+                    {/* Button for Registration Requests */}
                     <button
                       onClick={() => handleViewRequests(event.id)}
                       className={`flex items-center gap-1 px-3 py-2 rounded-lg shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 ${

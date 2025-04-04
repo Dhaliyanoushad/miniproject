@@ -6,14 +6,9 @@ import axios from "axios";
 
 const GuestD = () => {
   const [registeredEvents, setRegisteredEvents] = useState([]);
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [events, setEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("registered");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [dateFilter, setDateFilter] = useState({
-    type: "none", // "none", "before", "after", "between"
-    date1: "",
-    date2: "",
-  });
+  const [loading, setLoading] = useState(true);
   const [guestProfile, setGuestProfile] = useState({
     name: "Loading...",
     joinDate: "",
@@ -60,7 +55,7 @@ const GuestD = () => {
         });
 
         // Fetch registered events for the user
-        await fetchRegisteredEvents(userData.registeredEvents);
+        //await fetchRegisteredEvents(userData.registeredEvents);
 
         setIsLoading(false);
       } catch (err) {
@@ -78,126 +73,55 @@ const GuestD = () => {
     fetchCurrentUser();
   }, [navigate]);
 
-  // Fetch registered events from IDs
-  const fetchRegisteredEvents = async (eventIds) => {
-    if (!eventIds || eventIds.length === 0) {
-      setRegisteredEvents([]);
-      return;
-    }
-
-    try {
-      const response = await axios.get("/events/registered", {
-        params: { eventIds: eventIds.join(",") },
-        withCredentials: true,
-      });
-
-      // Transform data to match the expected format
-      const transformedEvents = response.data.map((event) => ({
-        id: event._id,
-        name: event.title || event.name,
-        date: new Date(event.date).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        }),
-        location: event.location || "Not specified",
-        status: "Confirmed", // Default status
-        // Add any other relevant fields from your Event schema
-      }));
-
-      setRegisteredEvents(transformedEvents);
-    } catch (error) {
-      console.error("Failed to fetch registered events:", error);
-      setError("Failed to load your registered events");
-    }
-  };
-
   // Fetch upcoming events
   useEffect(() => {
-    const fetchUpcomingEvents = async () => {
+    const fetchEvents = async (hostId) => {
       try {
-        const response = await axios.get("/events/upcoming", {
-          withCredentials: true,
+        setLoading(true);
+        // Updated endpoint to match the controller with axios
+        const response = await axios.get(`http://localhost:5000/events`, {
+          withCredentials: true, // Include cookies for auth
         });
+        console.log(hostId);
+        const data = response.data;
 
-        // Transform data to match the expected format
-        const transformedEvents = response.data.map((event) => ({
+        // Transform API data to match component state structure based on new schema
+        const formattedEvents = data.map((event) => ({
           id: event._id,
-          name: event.title || event.name,
-          type: event.category || "Event",
-          date: new Date(event.date).toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          }),
-          location: event.location || "Not specified",
-          spots: event.availableSpots
-            ? `${event.availableSpots} spots left`
-            : "Available",
-          price: event.price ? `$${event.price}` : "Free",
+          name: event.title, // Changed from name to title
+          date: event.date,
+          time: event.time,
+          venue: event.venue,
+          category: event.category,
+          capacity: event.capacity,
+          description: event.description,
+          status: event.status,
+          // Changed from guests to registeredAttendees
+          guests: event.registeredAttendees
+            ? event.registeredAttendees.map(
+                (attendee) => attendee.name || attendee.fullName
+              )
+            : [],
+          // Assuming guestRequests field may not exist in new schema
+          // May need to add a different API endpoint for pending requests
+          guestRequests: event.pendingRequests
+            ? event.pendingRequests.map(
+                (request) => request.name || request.fullName
+              )
+            : [],
+          attendeeCount: event.attendeeCount || 0,
         }));
 
-        setUpcomingEvents(transformedEvents);
+        setEvents(formattedEvents);
       } catch (error) {
-        console.error("Failed to fetch upcoming events:", error);
-        // Use dummy data as fallback if API fails
-        const dummyUpcomingEvents = [
-          {
-            id: 3,
-            name: "Startup Pitch Fest",
-            type: "Startup",
-            date: "June 20, 2025",
-            location: "Convention Center",
-            spots: "Limited spots",
-            price: "$149",
-          },
-          {
-            id: 4,
-            name: "Blockchain Summit",
-            type: "Technology",
-            date: "July 10, 2025",
-            location: "Conference Hall B",
-            spots: "Filling fast",
-            price: "$199",
-          },
-          {
-            id: 5,
-            name: "AI Ethics Conference",
-            type: "AI",
-            date: "August 18, 2025",
-            location: "Hall A",
-            spots: "Available",
-            price: "$129",
-          },
-        ];
-        setUpcomingEvents(dummyUpcomingEvents);
+        console.error("Error fetching events:", error);
+        setError("Failed to load events. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
-
-    fetchUpcomingEvents();
+    fetchEvents();
   }, []);
-
-  const filterEventsByDate = (events) => {
-    if (dateFilter.type === "none") return events;
-
-    return events.filter((event) => {
-      const eventDate = new Date(event.date);
-
-      switch (dateFilter.type) {
-        case "before":
-          return eventDate < new Date(dateFilter.date1);
-        case "after":
-          return eventDate > new Date(dateFilter.date1);
-        case "between":
-          return (
-            eventDate > new Date(dateFilter.date1) &&
-            eventDate < new Date(dateFilter.date2)
-          );
-        default:
-          return true;
-      }
-    });
-  };
 
   const handleViewTicket = (eventId) => {
     const event = registeredEvents.find((event) => event.id === eventId);
@@ -226,13 +150,6 @@ const GuestD = () => {
       console.error("Failed to cancel registration:", error);
       // Show error message to user
       alert("Failed to cancel registration. Please try again.");
-    }
-  };
-
-  const handleBookTicket = (eventId) => {
-    const event = upcomingEvents.find((event) => event.id === eventId);
-    if (event) {
-      setBookingEvent(event);
     }
   };
 
@@ -279,17 +196,6 @@ const GuestD = () => {
       navigate("/loginguest");
     }
   };
-
-  // Get unique event types for filter dropdown
-  const eventTypes = [...new Set(upcomingEvents.map((event) => event.type))];
-
-  const filteredUpcomingEvents = upcomingEvents
-    .filter(
-      (event) =>
-        searchQuery === "" ||
-        event.type.toLowerCase() === searchQuery.toLowerCase()
-    )
-    .filter(filterEventsByDate);
 
   // Show loading state while fetching user data
   if (isLoading) {
@@ -360,7 +266,12 @@ const GuestD = () => {
             }`}
             onClick={() => setActiveTab("registered")}
           >
-            <span>Registered Events</span>
+            <span>My Events</span>
+            {registeredEvents.length > 0 && (
+              <span className="bg-pink-500/60 text-white px-2 py-0.5 rounded-full text-xs">
+                {registeredEvents.length}
+              </span>
+            )}
           </button>
           <button
             className={`w-full py-3 px-4 rounded-lg flex items-center gap-3 transition duration-300 ${
@@ -370,7 +281,12 @@ const GuestD = () => {
             }`}
             onClick={() => setActiveTab("upcoming")}
           >
-            <span>Upcoming Events</span>
+            <span>All Events</span>
+            {events.length > 0 && (
+              <span className="bg-emerald-500/60 text-white px-2 py-0.5 rounded-full text-xs">
+                {events.length}
+              </span>
+            )}
           </button>
         </div>
 
@@ -385,124 +301,27 @@ const GuestD = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-8 overflow-y-auto">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">
             {activeTab === "registered"
               ? "Your Registered Events"
-              : "Discover Events"}
+              : "All Available Events"}
           </h1>
+          {activeTab === "registered" && registeredEvents.length > 0 && (
+            <span className="bg-white/10 text-white px-3 py-1 rounded-lg text-sm">
+              Total: {registeredEvents.length} events
+            </span>
+          )}
+          {activeTab === "upcoming" && events.length > 0 && (
+            <span className="bg-white/10 text-white px-3 py-1 rounded-lg text-sm">
+              Total: {events.length} events
+            </span>
+          )}
         </div>
 
         {/* Content Area */}
         <div className="mt-8">
-          {/* Search Bar and Date Filter for Upcoming Events */}
-          {activeTab === "upcoming" && (
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              {/* Event Type Filter */}
-              <div className="relative flex-1">
-                <select
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                    focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
-                >
-                  <option value="" className="bg-[#261646]">
-                    All Event Types
-                  </option>
-                  {eventTypes.map((type) => (
-                    <option key={type} value={type} className="bg-[#261646]">
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
-                  <svg
-                    className="w-5 h-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Date Filter Type */}
-              <div className="relative">
-                <select
-                  value={dateFilter.type}
-                  onChange={(e) =>
-                    setDateFilter({ ...dateFilter, type: e.target.value })
-                  }
-                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                    focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition appearance-none"
-                >
-                  <option value="none" className="bg-[#261646]">
-                    All Dates
-                  </option>
-                  <option value="before" className="bg-[#261646]">
-                    Before Date
-                  </option>
-                  <option value="after" className="bg-[#261646]">
-                    After Date
-                  </option>
-                  <option value="between" className="bg-[#261646]">
-                    Between Dates
-                  </option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
-                  <svg
-                    className="w-5 h-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Date input 1 */}
-              {dateFilter.type !== "none" && (
-                <div className="relative flex-1">
-                  <input
-                    type="date"
-                    value={dateFilter.date1}
-                    onChange={(e) =>
-                      setDateFilter({ ...dateFilter, date1: e.target.value })
-                    }
-                    className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
-                  />
-                </div>
-              )}
-
-              {/* Date input 2 (only for between filter) */}
-              {dateFilter.type === "between" && (
-                <div className="relative flex-1">
-                  <input
-                    type="date"
-                    value={dateFilter.date2}
-                    onChange={(e) =>
-                      setDateFilter({ ...dateFilter, date2: e.target.value })
-                    }
-                    className="w-full pl-4 pr-10 py-3 rounded-xl bg-white/10 border border-white/20 text-white 
-                      focus:outline-none focus:ring-2 focus:ring-[#7A3B69]/40 transition"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
           {activeTab === "registered" ? (
             registeredEvents.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -513,15 +332,15 @@ const GuestD = () => {
                   onClick={() => setActiveTab("upcoming")}
                   className="mt-4 bg-gradient-to-r from-[#7A3B69] to-[#563440] px-4 py-2 rounded-lg text-white font-medium hover:shadow-lg transition"
                 >
-                  Discover Events
+                  Browse All Events
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {registeredEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm"
+                    className="p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm hover:shadow-lg hover:border-white/20"
                   >
                     <div className="flex justify-between">
                       <h3 className="text-xl font-bold text-white">
@@ -539,9 +358,43 @@ const GuestD = () => {
                     </div>
                     <div className="mt-4 space-y-2">
                       <p className="text-gray-300 flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
                         {event.date}
                       </p>
                       <p className="text-gray-300 flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
                         {event.location}
                       </p>
                     </div>
@@ -563,19 +416,21 @@ const GuestD = () => {
                 ))}
               </div>
             )
-          ) : filteredUpcomingEvents.length === 0 ? (
+          ) : events.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-xl text-gray-400">No matching events found.</p>
+              <p className="text-xl text-gray-400">
+                No events available right now.
+              </p>
               <p className="text-gray-300 mt-2">
-                Try adjusting your search criteria.
+                Please check back later for upcoming events.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredUpcomingEvents.map((event) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {events.map((event) => (
                 <div
                   key={event.id}
-                  className="group relative p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm overflow-hidden"
+                  className="group relative p-6 rounded-xl border border-white/10 bg-gradient-to-r from-[#563440]/40 to-[#7A3B69]/30 transition duration-300 backdrop-blur-sm overflow-hidden hover:shadow-lg hover:border-white/20"
                 >
                   <div className="absolute inset-0 bg-white/5 transform scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-500"></div>
 
@@ -589,17 +444,60 @@ const GuestD = () => {
                           {event.name}
                         </h3>
                       </div>
+                      <span className="text-pink-200 text-sm font-semibold">
+                        {event.price}
+                      </span>
                     </div>
 
                     <div className="mt-4 space-y-2">
-                      <p className="text-gray-300">{event.date}</p>
-                      <p className="text-gray-300">{event.location}</p>
-                      <p className="text-gray-300">
-                        <span className="text-pink-200 text-sm">
-                          {event.spots}
-                        </span>
+                      <p className="text-gray-300 flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        {event.date}
                       </p>
+                      <p className="text-gray-300 flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        {event.location}
+                      </p>
+                      <p className="text-pink-200 text-sm">{event.spots}</p>
                     </div>
+
+                    {event.description && (
+                      <p className="mt-3 text-gray-300 text-sm line-clamp-2">
+                        {event.description}
+                      </p>
+                    )}
 
                     <button
                       onClick={() => handleBookTicket(event.id)}

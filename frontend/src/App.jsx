@@ -87,10 +87,7 @@ const AppContent = () => {
           <Routes>
             {/* Main Routes */}
             <Route path="/test" element={<Test />} />
-            <Route
-              path={`/${import.meta.env.VITE_SUPER_ADMIN}`}
-              element={<SuperAdminLogin />}
-            />
+            <Route path="/admin" element={<SuperAdminLogin />} />
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
             <Route path="/event/:id" element={<EventDetails />} />

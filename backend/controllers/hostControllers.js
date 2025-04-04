@@ -1,5 +1,5 @@
 const Host = require("../models/hostModel"); // Importing the Host model
-
+const Event = require("../models/eventModel"); // Importing the Event model
 exports.getAllHosts = async (req, res) => {
   try {
     const allHosts = await Host.find();
@@ -115,23 +115,30 @@ exports.hostLogout = async (req, res) => {
 };
 
 // Get all events created by the host
-exports.getHostEvents = async (req, res) => {
+exports.getEventsByHostId = async (req, res) => {
   try {
-    // Check if host is authenticated
-    if (!req.session.hostId) {
-      return res.status(401).json({ msg: "Not authenticated" });
-    }
+    const hostId = req.params;
 
-    // Find the host and populate their events
-    const host = await Host.findById(req.session.hostId).populate("events");
+    // Find events in MongoDB where host_id matches
+    const hostEvents = await Event.find({ host_id: hostId });
 
-    if (!host) {
-      return res.status(404).json({ msg: "Host not found" });
-    }
+    // Format the events as needed
+    const formattedEvents = hostEvents.map((event) => ({
+      id: event._id,
+      title: event.title,
+      date: new Date(event.event_date).toISOString().split("T")[0],
+      time: event.event_time,
+      venue: event.venue,
+      description: event.description,
+      category: event.category,
+      capacity: event.capacity,
+      // Add other fields as needed
+    }));
 
-    return res.status(200).json(host.events);
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
+    res.json(formattedEvents);
+  } catch (error) {
+    console.error("Error fetching host events:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
