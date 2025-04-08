@@ -6,15 +6,11 @@ const verifyToken = require("../middleware/authMiddleware");
 
 const SECRET_KEY = "your_secret_key";
 
-// POST route for host signup
+// ────── HOST SIGNUP ──────
 router.post("/signuphost", async (req, res) => {
   const { fullname, email, password, department, phone_number } = req.body;
-
   const db = req.app.locals.db;
 
-  // if (!fullname || !email || !password || !department || !phone_number) {
-  //   return res.status(400).json({ msg: "Please provide all fields." });
-  // }
   if (!fullname || !email || !password || !department || !phone_number) {
     const missingFields = [];
     if (!fullname) missingFields.push("fullname");
@@ -36,7 +32,6 @@ router.post("/signuphost", async (req, res) => {
   }
 
   try {
-    // Check if the email already exists
     const checkEmailSql = "SELECT * FROM hosts WHERE email = ?";
     db.query(checkEmailSql, [email], async (err, results) => {
       if (err) {
@@ -47,10 +42,7 @@ router.post("/signuphost", async (req, res) => {
         return res.status(400).json({ msg: "Email already exists." });
       }
 
-      // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
-
-      // SQL query to insert the new host into the database
       const sql = `INSERT INTO hosts (fullname, email, password, department, phone_number) VALUES (?, ?, ?, ?, ?)`;
 
       db.query(
@@ -64,12 +56,12 @@ router.post("/signuphost", async (req, res) => {
               .json({ msg: "Something went wrong. Please try again." });
           }
 
-          // Generate JWT token
           const token = jwt.sign(
             { id: result.insertId, email: email },
             SECRET_KEY,
             { expiresIn: "24h" }
           );
+
           const host = {
             id: result.insertId,
             name: fullname,
@@ -78,9 +70,6 @@ router.post("/signuphost", async (req, res) => {
             phone_number: phone_number,
             joined: new Date(),
           };
-
-          // localStorage.setItem("host", JSON.stringify(host));
-          // localStorage.setItem("token", token);
 
           return res.status(201).json({
             msg: "Signup successful, waiting for admin approval",
@@ -96,7 +85,7 @@ router.post("/signuphost", async (req, res) => {
   }
 });
 
-// POST route for guest signup
+// ────── GUEST SIGNUP ──────
 router.post("/signupguest", async (req, res) => {
   const { full_name, email, password, college_name, student_id } = req.body;
   const db = req.app.locals.db;
@@ -112,7 +101,6 @@ router.post("/signupguest", async (req, res) => {
   }
 
   try {
-    // Check if the email already exists
     const checkEmailSql = "SELECT * FROM guests WHERE email = ?";
     db.query(checkEmailSql, [email], async (err, results) => {
       if (err) {
@@ -123,10 +111,7 @@ router.post("/signupguest", async (req, res) => {
         return res.status(400).json({ msg: "Email already exists." });
       }
 
-      // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
-
-      // SQL query to insert the new guest into the database
       const sql = `INSERT INTO guests (full_name, email, password, college_name, student_id) VALUES (?, ?, ?, ?, ?)`;
 
       db.query(
@@ -140,7 +125,6 @@ router.post("/signupguest", async (req, res) => {
               .json({ msg: "Something went wrong. Please try again." });
           }
 
-          // Generate JWT token
           const token = jwt.sign(
             { id: result.insertId, email: email },
             SECRET_KEY,
@@ -170,7 +154,7 @@ router.post("/signupguest", async (req, res) => {
   }
 });
 
-// POST route for host login
+// ────── HOST LOGIN ──────
 router.post("/loginhost", async (req, res) => {
   const { email, password } = req.body;
   const db = req.app.locals.db;
@@ -181,25 +165,18 @@ router.post("/loginhost", async (req, res) => {
 
   const sql = `SELECT * FROM hosts WHERE email = ?`;
   db.query(sql, [email], async (err, results) => {
-    if (err) {
-      return res.status(500).json({ msg: "Database error." });
-    }
-    if (results.length === 0) {
+    if (err) return res.status(500).json({ msg: "Database error." });
+    if (results.length === 0)
       return res.status(400).json({ msg: "User not found." });
-    }
 
     const user = results[0];
     if (!user.is_approved) {
       return res.status(403).json({ msg: "Your account is not approved yet." });
     }
 
-    // Compare provided password with the hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid password." });
-    }
+    if (!isMatch) return res.status(400).json({ msg: "Invalid password." });
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.host_id, email: user.email },
       SECRET_KEY,
@@ -210,7 +187,7 @@ router.post("/loginhost", async (req, res) => {
   });
 });
 
-// POST route for guest login
+// ────── GUEST LOGIN ──────
 router.post("/loginguest", async (req, res) => {
   const { email, password } = req.body;
   const db = req.app.locals.db;
@@ -221,36 +198,25 @@ router.post("/loginguest", async (req, res) => {
 
   const sql = `SELECT * FROM guests WHERE email = ?`;
   db.query(sql, [email], async (err, results) => {
-    if (err) {
-      return res.status(500).json({ msg: "Database error." });
-    }
-    if (results.length === 0) {
+    if (err) return res.status(500).json({ msg: "Database error." });
+    if (results.length === 0)
       return res.status(400).json({ msg: "User not found." });
-    }
 
     const user = results[0];
-
-    // Compare provided password with the hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid password." });
-    }
+    if (!isMatch) return res.status(400).json({ msg: "Invalid password." });
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.guest_id, email: user.email },
       SECRET_KEY,
       { expiresIn: "24h" }
     );
 
-    res.status(200).json({
-      msg: "Login successful",
-      token,
-      guest: user,
-    });
+    res.status(200).json({ msg: "Login successful", token, guest: user });
   });
 });
 
+// ────── ADMIN LOGIN ──────
 router.post("/loginadmin", async (req, res) => {
   const db = req.app.locals.db;
   const { username, password } = req.body;
@@ -260,28 +226,20 @@ router.post("/loginadmin", async (req, res) => {
   }
 
   try {
-    // Step 1: Check if the username exists
     const query = "SELECT * FROM admin WHERE username = ?";
     db.query(query, [username], (err, results) => {
-      if (err) {
+      if (err)
         return res.status(500).json({ success: false, msg: "Database error" });
-      }
-
-      if (results.length === 0) {
-        // No admin with that username
+      if (results.length === 0)
         return res.status(404).json({ success: false, msg: "Admin not found" });
-      }
 
       const admin = results[0];
-
-      // Step 2: Check if the password matches
       if (admin.password !== password) {
         return res
           .status(401)
           .json({ success: false, msg: "Incorrect password" });
       }
 
-      // Step 3: Success
       return res.json({ success: true, msg: "Login successful" });
     });
   } catch (error) {
@@ -289,7 +247,7 @@ router.post("/loginadmin", async (req, res) => {
   }
 });
 
-// Optional: Token verification route
+// ────── TOKEN VERIFICATION ──────
 router.post("/verifytoken", verifyToken, (req, res) => {
   res.status(200).json({ msg: "Token is valid", user: req.user });
 });
