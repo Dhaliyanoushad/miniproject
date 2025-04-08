@@ -231,7 +231,7 @@ const GuestD = () => {
             }`}
             onClick={() => setActiveTab("registered")}
           >
-            <span>Registered Events</span>
+            <span>Registered Events {registeredEvents.length}</span>
           </button>
           <button
             className={`w-full py-3 px-4 rounded-lg flex items-center gap-3 transition duration-300 ${
@@ -241,7 +241,7 @@ const GuestD = () => {
             }`}
             onClick={() => setActiveTab("upcoming")}
           >
-            <span>Upcoming Events</span>
+            <span>Upcoming Events {upcomingEvents.length}</span>
           </button>
         </div>
 
